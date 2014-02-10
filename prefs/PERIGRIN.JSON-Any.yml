@@ -1,0 +1,15 @@
+---
+comment: |
+
+  use common::sense
+
+match:
+  distribution: "PERIGRIN/JSON-Any\d"
+pl:
+  eexpect:
+    mode: anyorder
+    timeout: 15
+    reuse: 1
+    talk:
+      - 'Auto-install the 1 optional module(s) from CPAN\?'
+      - "n\n"

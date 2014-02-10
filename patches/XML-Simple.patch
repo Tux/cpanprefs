@@ -1,0 +1,59 @@
+diff -purd a/lib/XML/Simple.pm b/lib/XML/Simple.pm
+--- a/lib/XML/Simple.pm	2012-06-20 12:00:21.000000000 +0200
++++ b/lib/XML/Simple.pm	2013-05-14 12:30:50.116631467 +0200
+@@ -637,6 +637,7 @@ sub XMLout {
+ 
+   $self->{_ancestors} = [];
+   my $xml = $self->value_to_xml($ref, $self->{opt}->{rootname}, '');
++  $self->{opt}{noindent} or $xml =~ s{(\n\s*)</}{$1  </}g;
+   delete $self->{_ancestors};
+ 
+   if($self->{opt}->{xmldecl}) {
+diff -purd a/t/2_XMLout.t b/t/2_XMLout.t
+--- a/t/2_XMLout.t	2012-06-20 12:00:21.000000000 +0200
++++ b/t/2_XMLout.t	2013-05-14 12:29:49.993626715 +0200
+@@ -1023,7 +1023,7 @@ like($_, qr{
+     <person(\s+name="bob"|\s+age="25"){2}\s*/>
+     |<person(\s+name="kate"|\s+age="22"){2}\s*/>
+     ){2}
+-  </opt>
++    </opt>
+ }sx,
+ 'NoIndent worked ok with KeyAttr');
+ 
+@@ -1047,7 +1047,7 @@ is($_, '<opt alpha="1"
+      gamma="3">
+   <colours green="#00ff00"
+            red="#ff0000" />
+-</opt>
++  </opt>
+ ', 'AttrIndent seems to work');
+ 
+ 
+@@ -1060,7 +1060,7 @@ $xml = q{
+   <test id="alpha" animal="giraffe"  vegetable="pumpkin" />
+   <box size="small" key="a" />
+   <box size="medium" id="b" />
+-</opt>
++  </opt>
+ };
+ 
+ $ref = XMLin($xml);
+@@ -1073,7 +1073,7 @@ is($_, qq(<opt>\n) .
+        qq(  <test name="alpha" animal="giraffe" vegetable="pumpkin" />\n) .
+        qq(  <test name="beta" animal="elephant" vegetable="carrot" />\n) .
+        qq(  <test name="gamma" animal="tiger" vegetable="turnip" />\n) .
+-       qq(</opt>\n),
++       qq(  </opt>\n),
+ 'sorting by default key attribute works');
+ 
+ 
+@@ -1092,7 +1092,7 @@ is($_, qq(<opt>\n) .
+        qq(  <test vegetable="carrot" animal="elephant" id="beta" />\n) .
+        qq(  <test vegetable="pumpkin" animal="giraffe" id="alpha" />\n) .
+        qq(  <test vegetable="turnip" animal="tiger" id="gamma" />\n) .
+-       qq(</opt>\n),
++       qq(  </opt>\n),
+ 'sorting by specified key attributes works');
+ 
+ 

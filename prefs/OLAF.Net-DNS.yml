@@ -1,0 +1,9 @@
+--- 
+match:
+  distribution: "^OLAF/Net-DNS-"
+pl: 
+  args: 
+    - --no-online-tests
+depends:
+  requires:
+    Test::More: 0.72

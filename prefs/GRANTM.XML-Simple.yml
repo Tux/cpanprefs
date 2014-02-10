@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "GRANTM/XML-Simple"
+patches:
+  - "../../patches/XML-Simple.patch"

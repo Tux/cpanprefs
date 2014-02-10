@@ -1,0 +1,8 @@
+--- 
+match:
+  distribution: "SREZIC/Tk-804"
+  osname: "hpux"
+  archname: "LP64"
+build:
+  env:
+    CFLAGS: -mlp64

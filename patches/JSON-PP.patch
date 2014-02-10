@@ -1,0 +1,131 @@
+--- lib/JSON/backportPP.pm	2011-01-04 17:11:52.000000000 +0100
++++ lib/JSON/backportPP.pm	2011-01-19 18:49:05.000000000 +0100
+@@ -374,7 +374,8 @@ sub allow_bigint {
+         --$depth;
+         $self->_down_indent() if ($indent);
+ 
+-        return   '{' . ( @res ? $pre : '' ) . ( @res ? join( ",$pre", @res ) . $post : '' )  . '}';
++        my $close_indent = $pre ? " " x $self->{indent_length} : "";
++        return   '{' . ( @res ? $pre : '' ) . ( @res ? join( ",$pre", @res ) . $post : '' )  . $close_indent.'}';
+     }
+ 
+ 
+@@ -394,7 +395,8 @@ sub allow_bigint {
+         --$depth;
+         $self->_down_indent() if ($indent);
+ 
+-        return '[' . ( @res ? $pre : '' ) . ( @res ? join( ",$pre", @res ) . $post : '' ) . ']';
++        my $close_indent = $pre ? " " x $self->{indent_length} : "";
++        return '[' . ( @res ? $pre : '' ) . ( @res ? join( ",$pre", @res ) . $post : '' ) . $close_indent.']';
+     }
+ 
+ 
+--- t/06_pc_pretty.t	2011-01-31 08:17:18.000000000 +0100
++++ t/06_pc_pretty.t	2011-01-31 08:20:41.000000000 +0100
+@@ -26,8 +26,8 @@ is($js,q|[
+    "hoge",
+    {
+       "foo" : "bar"
+-   }
+-]
++      }
++   ]
+ |);
+ 
+ $obj = { foo => [ {a=>"b"}, 0, 1, 2 ] };
+@@ -43,12 +43,12 @@ is($js,q|{
+    "foo" : [
+       {
+          "a" : "b"
+-      },
++         },
+       0,
+       1,
+       2
+-   ]
+-}
++      ]
++   }
+ |);
+ 
+ $obj = { foo => [ {a=>"b"}, 0, 1, 2 ] };
+@@ -59,11 +59,11 @@ is($js,q|{"foo":[{"a":"b"},0,1,2]}|);
+ 
+ $obj = {foo => "bar"};
+ $pc->indent(3); # original -- $pc->indent(1);
+-is($pc->encode($obj), qq|{\n   "foo":"bar"\n}\n|, "nospace");
++is($pc->encode($obj), qq|{\n   "foo":"bar"\n   }\n|, "nospace");
+ $pc->space_after(1);
+-is($pc->encode($obj), qq|{\n   "foo": "bar"\n}\n|, "after");
++is($pc->encode($obj), qq|{\n   "foo": "bar"\n   }\n|, "after");
+ $pc->space_before(1);
+-is($pc->encode($obj), qq|{\n   "foo" : "bar"\n}\n|, "both");
++is($pc->encode($obj), qq|{\n   "foo" : "bar"\n   }\n|, "both");
+ $pc->space_after(0);
+-is($pc->encode($obj), qq|{\n   "foo" :"bar"\n}\n|, "before");
++is($pc->encode($obj), qq|{\n   "foo" :"bar"\n   }\n|, "before");
+ 
+--- t/e15_tie_ixhash.t	2011-01-31 08:22:07.000000000 +0100
++++ t/e15_tie_ixhash.t	2011-01-31 08:22:26.000000000 +0100
+@@ -37,7 +37,7 @@ SKIP: {
+    "3" : "c",
+    "4" : "d",
+    "5" : "e"
+-}
++   }
+ STR
+ 
+ }
+--- t/xe05_indent_length.t	2013-04-17 17:49:16.819970976 +0200
++++ t/xe05_indent_length.t	2013-04-17 17:51:41.786227857 +0200
+@@ -18,10 +18,10 @@ is($json->indent->encode([1,{foo => 'bar
+   1,
+   {
+     "foo":"bar"
+-  },
++    },
+   "1",
+   "/"
+-]
++  ]
+ |);
+ 
+ 
+@@ -29,10 +29,10 @@ is($json->escape_slash(1)->pretty->inden
+   1,
+   {
+     "foo" : "bar"
+-  },
++    },
+   "1",
+   "\\/"
+-]
++  ]
+ |);
+ 
+ 
+@@ -40,20 +40,20 @@ is($json->escape_slash(1)->pretty->inden
+    1,
+    {
+       "foo" : "bar"
+-   },
++      },
+    "1",
+    "\\/"
+-]
++   ]
+ |);
+ 
+ is($json->escape_slash(1)->pretty->indent_length(15)->encode([1,{foo => 'bar'}, "1", "/"]), qq|[
+                1,
+                {
+                               "foo" : "bar"
+-               },
++                              },
+                "1",
+                "\\/"
+-]
++               ]
+ |);
+ 
+ 

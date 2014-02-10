@@ -1,0 +1,10 @@
+--- t/23json.t	2013-12-20 09:18:58.156470099 +0100
++++ t/23json.t	2013-12-20 09:19:01.114502210 +0100
+@@ -301,4 +301,7 @@ my $tr = SQL::Translator->new(
+ 
+ my $out;
+ ok( $out = $tr->translate, 'Translate SQLite to JSON' );
++# Ignoge indent changes
++s/^\s+//mg for $out, $json;
++s/[{[]\K\s+(?=[\]}])//g for $out, $json;
+ eq_or_diff( $out, $json, 'JSON matches expected' );

@@ -1,0 +1,9 @@
+---
+comment: |
+
+  Default perl should *NOT* have thread support!
+
+match:
+  distribution: "DURIST/Proc-ProcessTable-0.45"
+patches:
+  - "../../patches/Proc-ProcessTable-0.45.patch"

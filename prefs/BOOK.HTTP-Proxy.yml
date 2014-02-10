@@ -1,0 +1,11 @@
+---
+comment: |
+
+  The documentation is not complete.
+  IMHO a distribution should not fail on that. It is a developer issue
+
+match:
+  distribution: "BOOK/HTTP-Proxy-0.24.tar.gz"
+test:
+  args:
+    - --test_files 't/0[013-9]*.t' --test_files 't/[1-9]*.t'

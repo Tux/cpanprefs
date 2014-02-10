@@ -1,0 +1,16 @@
+--- 
+comment: For SVN:Core
+match:
+  distribution: "MSCHWERN/Alien-SVN"
+pl:
+  eexpect:
+    mode:    anyorder
+    timeout: 15
+    reuse:   1
+    talk:
+      - "Which make should I use to build Subversion"
+      - "\n"
+      - "Run Subversion's configure now"
+      - "\n"
+      - "Would you like to pass any arguments to configure"
+      - "\n"

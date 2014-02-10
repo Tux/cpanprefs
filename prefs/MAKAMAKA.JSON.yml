@@ -1,0 +1,6 @@
+---
+comment: improve readability & use common::sense
+match:
+  distribution: '^MAKAMAKA/JSON-\d'
+patches:
+  - "../../patches/JSON-PP.patch"

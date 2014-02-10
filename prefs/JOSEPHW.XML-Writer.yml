@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "JOSEPHW/XML-Writer"
+patches:
+  - "../../patches/XML-Writer.patch"

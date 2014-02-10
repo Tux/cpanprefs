@@ -1,0 +1,5 @@
+---
+comment: "no reason to reinvent every wheel available in core"
+match:
+    distribution: "^EXODIST"
+disabled: 1

@@ -1,0 +1,111 @@
+diff -purd XML-Writer-0.614/t/01_main.t XML-Writer-0.614-duSm95/t/01_main.t
+--- a/t/01_main.t	2012-01-08 14:25:40.000000000 +0100
++++ b/t/01_main.t	2012-01-15 11:00:44.229966000 +0100
+@@ -853,7 +853,7 @@ TEST: {
+  <empty />
+  <mixed>This is <mixed /> <x>content</x>.</mixed>
+      <data>This is data</data>
+-</doc>
++     </doc>
+ EOS
+ };
+ 
+@@ -913,7 +913,7 @@ TEST: {
+ 
+ <doc>
+  <item />
+-</doc>
++ </doc>
+ EOS
+ };
+ 
+@@ -1072,11 +1072,11 @@ TEST: {
+     <__NS3:element xmlns:__NS3="c">
+      <__NS4:element xmlns:__NS4="d"></__NS4:element>
+      <__NS4:element xmlns:__NS4="d"></__NS4:element>
+-    </__NS3:element>
++     </__NS3:element>
++    </__NS2:element>
+    </__NS2:element>
+-  </__NS2:element>
++  </__NS1:element>
+  </__NS1:element>
+-</__NS1:element>
+ EOS
+ };
+ 
+@@ -1232,16 +1232,16 @@ TEST: {
+  <__NS1:elem1 xmlns:__NS1="b">
+   <__NS1:elem1 />
+   <elem2 />
+- </__NS1:elem1>
++  </__NS1:elem1>
+  <elem1 xmlns="b">
+   <elem1 />
+   <__NS1:elem2 xmlns:__NS1="a" />
+- </elem1>
++  </elem1>
+  <__NS1:elem1 xmlns:__NS1="b">
+   <__NS1:elem1 />
+   <elem2 />
+- </__NS1:elem1>
+-</doc>
++  </__NS1:elem1>
++ </doc>
+ EOS
+ };
+ 
+@@ -1274,8 +1274,8 @@ TEST: {
+   <__NS2:elem3 />
+   <__NS2:elem3 />
+   <__NS2:elem3 />
+- </__NS1:elem1>
+-</doc>
++  </__NS1:elem1>
++ </doc>
+ EOS
+ };
+ 
+@@ -1588,10 +1588,10 @@ TEST: {
+  <!-- Test 2 -->
+  <y>
+   <!-- Test 3 -->
+- </y>
++  </y>
+  <!-- Test 4 -->
+  <y></y>
+-</x>
++ </x>
+ <!-- Test 5 -->
+ EOR
+ }
+@@ -1919,7 +1919,7 @@ TEST: {
+ 
+ <doc>
+   <item />
+-</doc>
++  </doc>
+ EOS
+ };
+ 
+@@ -1962,7 +1962,7 @@ TEST: {
+ <item />
+  <item />
+ \t<item />
+-</doc>
++\t</doc>
+ EOS
+ };
+ 
+diff -purd XML-Writer-0.614/Writer.pm XML-Writer-0.614-duSm95/Writer.pm
+--- a/Writer.pm	2012-01-08 14:25:40.000000000 +0100
++++ b/Writer.pm	2012-01-15 10:54:34.133966002 +0100
+@@ -320,7 +320,7 @@ sub new {
+     $elementLevel--;
+     if ($dataMode && $hasElement) {
+       $output->print("\n");
+-      $output->print($dataIndent x $elementLevel);
++      $output->print($dataIndent x (1 + $elementLevel));
+     }
+     $output->print("</$name$nl>");
+     if ($dataMode) {

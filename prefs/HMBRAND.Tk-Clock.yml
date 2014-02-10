@@ -1,0 +1,6 @@
+--- 
+match:
+  distribution: "HMBRAND/Tk-Clock-"
+test:
+  env:
+    TK_TEST_LENGTH: 500

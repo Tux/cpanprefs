@@ -1,0 +1,11 @@
+---
+comment: |
+
+  ack uses the annoying '#!env perl' header line, causing all calls to
+  ack on /pro/3gl/CPAN/perl* to fail
+
+  Find a decent way to change that fucking header with the absolute path
+  to the current perl it is installing with
+
+match:
+  distribution: 'PETDANCE/ack-\d'

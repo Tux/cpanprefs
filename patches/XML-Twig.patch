@@ -1,0 +1,11 @@
+--- tools/xml_pp/xml_pp	2010-10-29 13:30:38.000000000 +0200
++++ tools/xml_pp/xml_pp	2010-10-29 13:30:49.000000000 +0200
+@@ -10,7 +10,7 @@ my @styles= XML::Twig->_pretty_print_sty
+ my $styles= join '|', @styles;               # for usage
+ my %styles= map { $_ => 1} @styles;          # to check option
+ 
+-my $DEFAULT_STYLE= 'indented';
++my $DEFAULT_STYLE= 'indented_close_tag';
+ 
+ my $USAGE= "usage: $0 [-v] [-i<extension>] [-s ($styles)] [-p <tag(s)>] [-e <encoding>] [-l] [-f <file>] [<files>]";
+ 

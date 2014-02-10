@@ -1,0 +1,30 @@
+---
+match:
+  distribution: "^(DLAND|NANIS)/Crypt-SSLeay-"
+  perlconfig:
+    osname: "linux"
+pl:
+  eexpect:
+    mode: anyorder
+    talk:
+      - "Which OpenSSL build path"
+      - "\n"
+      - "Which SSL install path"
+      - "\n"
+      - "Do you want to run the live tests"
+      - "n\n"
+---
+match:
+  distribution: "^(DLAND|NANIS)/Crypt-SSLeay-"
+  perlconfig:
+    osname: "hpux"
+pl:
+  eexpect:
+    mode: anyorder
+    talk:
+      - "Which OpenSSL build path"
+      - "\n"
+      - "Which SSL install path"
+      - "/usr/local/ssl\n"
+      - "Do you want to run the live tests"
+      - "n\n"

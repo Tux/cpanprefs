@@ -1,0 +1,5 @@
+---
+comment: "use common sense"
+match:
+    distribution: "^MLEHMANN/(?!JSON-XS|Types-Serialiser)"
+disabled: 1

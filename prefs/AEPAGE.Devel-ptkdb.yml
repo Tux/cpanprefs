@@ -1,0 +1,10 @@
+--- 
+comment: |
+
+  Missing prereq
+
+match:
+  distribution: '^AEPAGE/Devel-ptkdb-\d'
+depends:
+  requires:
+    Tk: 0
