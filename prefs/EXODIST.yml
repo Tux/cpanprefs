@@ -1,5 +1,5 @@
 ---
 comment: "no reason to reinvent every wheel available in core"
 match:
-    distribution: "^EXODIST"
+    distribution: "^EXODIST/Fennec-[0-9]"
 disabled: 1

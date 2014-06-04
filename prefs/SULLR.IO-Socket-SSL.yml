@@ -1,0 +1,7 @@
+--- 
+match:
+  distribution: "^SULLR/IO-Socket-SSL-"
+pl: 
+  expect:
+    - '\Qnetwork traffic to external sites.   [Y/n] [y]\E'
+    - "y\n"
