@@ -1,0 +1,18 @@
+diff t/37-mod_xmlrpc.t t/37-mod_xmlrpc.t
+index 67d5370..b8a23bf 100644
+--- t/37-mod_xmlrpc.t
++++ t/37-mod_xmlrpc.t
+@@ -7,11 +7,11 @@ use Test::More;
+ 
+ BEGIN { plan tests => 17 }
+ 
+-eval { require XMLRPC::Lite };
++eval { require XMLRPC::Test::Server };
+ 
+ SKIP: {
+ 
+-    skip 'need XMLRPC::Lite', 17 if $@;
++    skip 'need XMLRPC::Test::Server', 17 if $@;
+ 
+     XMLRPC::Test::Server::run_for( shift || 'http://localhost/mod_xmlrpc' );
+

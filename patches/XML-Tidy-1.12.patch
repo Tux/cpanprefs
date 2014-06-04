@@ -1,0 +1,12 @@
+diff -purd a/Tidy.pm b/Tidy.pm
+--- a/Tidy.pm	2011-05-06 02:02:52 +0200
++++ b/Tidy.pm	2014-04-28 15:32:05 +0200
+@@ -771,6 +771,8 @@ sub AUTOLOAD { # methods (created as nec
+ sub DESTROY { } # do nothing but define in case && to calm test warnings
+ 127;
+ 
++=encoding iso8859-1
++
+ =head1 NAME
+ 
+ XML::Tidy - tidy indenting of XML documents

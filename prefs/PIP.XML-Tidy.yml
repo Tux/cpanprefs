@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "PIP/XML-Tidy-1.12"
+patches:
+  - "../../patches/XML-Tidy-1.12.patch"
