@@ -2,8 +2,8 @@
 comment: For SVN:Core
 match:
   distribution: "MSCHWERN/Alien-SVN"
-patches:
-  - "../../patches/Alien-SVN.patch"
+#patches:
+#  - "../../patches/Alien-SVN.patch"
 pl:
   eexpect:
     mode:    anyorder
