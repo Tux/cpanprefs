@@ -1,0 +1,7 @@
+--- 
+match:
+  distribution: "RFRANKEL/iCal-Parser-SAX-"
+pl:
+  expect:
+    - "Would you like to install ical2xml, a command line frontend\? \[n \]"
+    - "y\n"

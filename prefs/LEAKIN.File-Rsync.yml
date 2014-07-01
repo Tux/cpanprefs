@@ -2,10 +2,6 @@
 match:
   distribution: "LEAKIN/File-Rsync"
 pl:
-  eexpect:
-    mode: anyorder
-    timeout: 15
-    reuse: 1
-    talk:
-      - "Path to rsync \[[^]+\]: "
-      - "\n"
+  expect:
+    - "Path to rsync \[.*\]: "
+    - "\n"

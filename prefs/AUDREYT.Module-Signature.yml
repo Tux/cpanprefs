@@ -3,5 +3,5 @@ match:
   distribution: " AUDREYT/Module-Signature"
 pl:
   expect:
-    - "Import PAUSE and author keys to GnuPG? [y]"
+    - "Import PAUSE and author keys to GnuPG\? \[y\]"
     - "n\n"

@@ -7,5 +7,5 @@ pl:
     timeout: 15
     reuse: 1
     talk:
-      - "Enable the use of /tmp for tests?"
+      - "Enable the use of /tmp for tests\?"
       - "n\n"

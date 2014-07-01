@@ -1,0 +1,11 @@
+--- 
+match:
+  distribution: "RKINYON/DBM-Deep-"
+pl:
+  expect:
+    - "Run the long-running tests \[n \]"
+    - "n\n"
+    - "Run the tests against the DBI engine via SQLite\? \[n \]"
+    - "y\n"
+    - "Run the tests against the DBI engine via MySQL\? \[n \]"
+    - "n\n"

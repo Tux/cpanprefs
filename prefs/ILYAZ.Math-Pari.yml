@@ -3,5 +3,5 @@ match:
   distribution: "ILYAZ/Math-Pari"
 pl:
   expect:
-    - "Fetch? (y/n, press Enter)"
+    - "Fetch\? \(y/n, press Enter\)"
     - "y\n"

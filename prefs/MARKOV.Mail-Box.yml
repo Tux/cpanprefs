@@ -3,5 +3,5 @@ match:
   distribution: "MARKOV/Mail-Box"
 pl:
   expect:
-    - "Do you want to install HTML::FormatText? yes/no/all/none [y]"
+    - "Do you want to install HTML::FormatText\? yes/no/all/none \[y\]"
     - "all\n"
