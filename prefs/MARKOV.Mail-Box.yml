@@ -2,6 +2,12 @@
 match:
   distribution: "MARKOV/Mail-Box"
 pl:
-  expect:
-    - "Do you want to install HTML::FormatText\? yes/no/all/none \[y\]"
-    - "all\n"
+  eexpect:
+    mode: anyorder
+    timeout: 15
+    reuse: 1
+    talk:
+      - "Do you want to run the \(large set of\) tests\? yes/no \[yes\]"
+      - "\n"
+      - "Do you want to install HTML::FormatText\? yes/no/all/none \[y\]"
+      - "all\n"
