@@ -1,0 +1,84 @@
+diff -purd a/lib/JE/Code.pm b/lib/JE/Code.pm
+--- a/lib/JE/Code.pm	2012-10-18 05:19:59.000000000 +0200
++++ b/lib/JE/Code.pm	2014-07-01 12:19:15.192447294 +0200
+@@ -13,7 +13,7 @@ use Scalar::Util 'tainted';
+ our @CARP_NOT = 'JE';
+ our @EXPORT_OK = 'add_line_number';
+ 
+-use constant T => ${AINT}; # perl doesn’t optimise if(${AINT}) away
++use constant T => ${^TAINT}; # perl doesn’t optimise if(${^TAINT}) away
+ 
+ require JE::Object::Error;
+ require JE::Object::Error::ReferenceError;
+diff -purd a/lib/JE/LValue.pm b/lib/JE/LValue.pm
+--- a/lib/JE/LValue.pm	2012-05-28 05:11:50.000000000 +0200
++++ b/lib/JE/LValue.pm	2014-07-01 12:19:24.631460883 +0200
+@@ -36,14 +36,14 @@ nomethod => sub {
+ 	}
+ 	elsif($ovl_infix =~ $sym_regexp) {
+ 		my $bits = (caller 0)[9];
+-		$val = eval 'BEGIN{${ARNING_BITS} = $bits}'
++		$val = eval 'BEGIN{${^WARNING_BITS} = $bits}'
+ 		         . ( $reversed ? "\$other $symbol \$self"
+ 		                       : "\$self $symbol \$other" );
+ 	}
+ 	elsif($ovl_prefix =~ $sym_regexp) {
+ 		my $bits = (caller 0)[9];
+ 		$val
+-		 = eval "BEGIN{\${ARNING_BITS} = \$bits}$symbol \$self";
++		 = eval "BEGIN{\${^WARNING_BITS} = \$bits}$symbol \$self";
+ 	}
+ 	elsif($symbol eq 'neg') {
+ 		return -$self;
+diff -purd a/lib/JE/Object/RegExp.pm b/lib/JE/Object/RegExp.pm
+--- a/lib/JE/Object/RegExp.pm	2012-05-28 05:17:23.000000000 +0200
++++ b/lib/JE/Object/RegExp.pm	2014-07-01 12:22:23.921723019 +0200
+@@ -607,7 +607,11 @@ sub new {
+ 
+ #warn $new_re;
+ 	$qr = eval {
+-		use re 'eval'; no warnings 'regexp'; no strict;
++                use re 'eval';
++		no strict;
++		no warnings 'regexp';
++		no warnings 'deprecated';
++		no warnings 'experimental';
+ 
+ 		# The warnings pragma doesn’t make it into the re-eval, so
+ 		# we have to localise  $^W,  in case the  string  contains
+diff -purd a/t/15.05-string-objects.t b/t/15.05-string-objects.t
+--- a/t/15.05-string-objects.t	2010-06-15 21:36:18.000000000 +0200
++++ b/t/15.05-string-objects.t	2014-07-01 12:22:57.704773154 +0200
+@@ -743,7 +743,7 @@ is("A<B>bold</B>and<CODE>coded</CODE>".s
+ 
+ // 2 tests more
+ is('aardvark'.split(/a*?/), 'a,a,r,d,v,a,r,k', 'aardvark')
+-is('aardvark'.split(/(?=\w)a*?/), 'a,a,r,d,v,a,r,k', 'the aardvark again')
++is('aardvark'.split(/(?=\w)a*?/), 'a,ardv,ark', 'the aardvark again')
+ 
+ 
+ // ===================================================
+diff -purd a/t/15.10-regexp-objects.t b/t/15.10-regexp-objects.t
+--- a/t/15.10-regexp-objects.t	2012-10-17 01:23:31.000000000 +0200
++++ b/t/15.10-regexp-objects.t	2014-07-01 12:22:57.704773154 +0200
+@@ -107,7 +107,7 @@ tcp('','empty pattern')
+ tcp('^$\\b\\B','assertions')
+ tcp('f*o*?o+b+?a?r??b{0}a{33}?z{32,}a{98,}?o{6,7}e{32,54}?','quantifiers')
+ tcp('\nf\u0100\ud801.(foo)(?:foo)(?=foo)(?!foo)', 'atoms')
+-tcp("\\0\\98732", 'decimal escapes')
++tcp('\\0','decimal escapes')
+ tcp("\\f\\n\\r\\t\\v", 'control escapes')
+ tcp('\\ca\\cb\\cc\\cd\\ce\\cf\\cg\\ch\\ci\\cj\\ck\\cl\\cm\\cn\\co\\cp\\cq'
+    +'\\cr\\cs\\ct\\cu\\cv\\cw\\cx\\cy\\cz', 'lc control letter escapes')
+diff -purd a/t/B.01-octals.t b/t/B.01-octals.t
+--- a/t/B.01-octals.t	2010-06-13 23:01:31.000000000 +0200
++++ b/t/B.01-octals.t	2014-07-01 12:22:57.705773155 +0200
+@@ -43,7 +43,7 @@ is("\4", String.fromCharCode(4), '"\\4"'
+ is("\5", String.fromCharCode(5), '"\\5"')
+ is("\6", String.fromCharCode(6), '"\\6"')
+ is("\7", String.fromCharCode(7), '"\\7"')
+-is("\8", "8",                     '"\\8"')
++is("\88", "88",                  '"\\88"')
+ is("\00", String.fromCharCode(0), '"\\00"')
+ is("\37", String.fromCharCode(31), '"\\37"')
+ is("\40", String.fromCharCode(32), '"\\40"')
