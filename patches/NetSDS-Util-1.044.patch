@@ -1,0 +1,11 @@
+--- lib/NetSDS/Util/FileImport.pm.orig	2009-09-15 17:17:32.000000000 +0200
++++ lib/NetSDS/Util/FileImport.pm	2014-10-22 08:51:24.025216290 +0200
+@@ -49,6 +49,8 @@ Depends of a params parse would be diffe
+ Returns a structure like this 
+ 	[ { last_name => undef, first_name => yana, ... }, { last_name => kornienko, first_name => test, ... } .. ]
+ 
++=back
++
+ =cut 
+ 
+ sub import_table($;$$) {

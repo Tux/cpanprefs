@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "RATTLER/NetSDS-Util-1.044"
+patches:
+  - "../../patches/NetSDS-Util-1.044.patch"
