@@ -1,0 +1,21 @@
+diff -purd lib/Text/CSV/Track.pm lib/Text/CSV/Track.pm
+--- lib/Text/CSV/Track.pm	2007-11-01 14:27:17.000000000 +0100
++++ lib/Text/CSV/Track.pm	2014-11-15 13:02:10.196470537 +0100
+@@ -551,13 +551,15 @@ sub _init {
+ 	return if not $file_name;
+ 
+ 	#define csv format
+-	$self->_csv_format(Text::CSV_XS->new({
++	my $xs_args = {
+ 		sep_char     => $sep_char,
+ 		escape_char  => $escape_char,
+ 		quote_char   => $quote_char,
+ 		always_quote => $always_quote,
+ 		binary       => $binary,
+-	}));
++	};
++	$Text::CSV_XS::VERSION ge "1.02" and $xs_args->{decode_utf8} = 0;
++	$self->_csv_format(Text::CSV_XS->new($xs_args));
+ 
+ 	#default open mode is reading
+ 	my $open_mode = '<';
