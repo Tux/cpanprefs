@@ -1,0 +1,13 @@
+--- inc/Module/Install/PRIVATE/Net/SSLeay.pm    2014-09-15 15:02:54 +0200
++++ inc/Module/Install/PRIVATE/Net/SSLeay.pm    2014-09-15 15:02:57 +0200
+@@ -140,6 +140,10 @@ EOM
+         }
+     }
+
++    if (my $lp = join " " => map { "-L$_" } @{$opts->{lib_paths} || []}) {
++	my $mma = $self->makemaker_args;
++	($mma->{uc $_} = $Config{$_}) =~ s/-L/$lp -L/ for qw( lddlflags ldflags );
++	}
+     return $opts;
+ }
+
