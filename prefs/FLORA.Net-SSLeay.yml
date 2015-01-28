@@ -1,8 +1,6 @@
 --- 
 match:
   distribution: "\w+/Net-SSLeay-\d"
-patches:
-  - "../../patches/Net-SSLeay-1.66.patch"
 pl:
   expect:
     - "Do you want to run external tests?"
