@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "MSCHILLI/Net-HTTP-6.07"
+patches:
+  - "../../patches/Net-HTTP-6.07.patch"

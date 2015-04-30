@@ -1,0 +1,12 @@
+--- lib/Net/HTTP/Methods.pm	2014-07-24 05:27:26.000000000 +0200
++++ lib/Net/HTTP/Methods.pm	2015-04-29 17:38:59.311265516 +0200
+@@ -268,7 +268,8 @@ sub my_readline {
+           READ:
+             {
+                 die "read timeout" unless $self->can_read;
+-                my $n = $self->sysread($_, 1024, length);
++                my $n;
++                1 while ($n = $self->sysread($_, 1024, length)) && defined $n && $n == 1024;
+                 unless (defined $n) {
+                     redo READ if $!{EINTR} || $!{EAGAIN};
+                     # if we have already accumulated some data let's at least
