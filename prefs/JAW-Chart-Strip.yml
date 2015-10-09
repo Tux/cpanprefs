@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "JAW/Chart-Strip-1.08"
+patches:
+  - "../../patches/Chart-Strip-1.08.patch"
