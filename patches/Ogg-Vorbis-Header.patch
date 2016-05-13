@@ -1,0 +1,19 @@
+--- test.pl 2015-06-02 15:49:17.716856098 +0200
++++ test.pl 2015-06-02 15:51:40.553271640 +0200
+@@ -25,7 +25,7 @@ ok($ogg->load);
+ # Try all the routines
+ ok($ogg->info->{"rate"} == 44100);
+ ok($ogg->comment_tags);
+-ok(@{$ogg->comment("artist")}->[0] == "Dan");
++ok([$ogg->comment("artist")]->[0] eq "Dan");
+ ok($ogg->add_comments("moog", "bog"));
+ ok($ogg->edit_comment("moog", "bug"));
+ ok($ogg->delete_comment("artist"));
+@@ -36,6 +36,6 @@ ok($ogg->clear_comments);
+
+ # See if full load works
+ ok(my $ogg = Ogg::Vorbis::Header->load("test.ogg.2"));
+-ok(@{$ogg->comment("moog")}->[0] == "bug");
++ok([$ogg->comment("moog")]->[0] eq "bug");
+
+ unlink("test.ogg.2");

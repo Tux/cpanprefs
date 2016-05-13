@@ -1,0 +1,6 @@
+---
+comment: "https://rt.cpan.org/Ticket/Display.html?id=104869"
+match:
+  distribution: "DBP/Ogg-Vorbis-Header-0.03"
+patches:
+  - "../../patches/Ogg-Vorbis-Header.patch"
