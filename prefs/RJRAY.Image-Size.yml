@@ -1,0 +1,7 @@
+---
+comment: "WEBP format not supported on HP-UX"
+match:
+  distribution: "R/RJ/RJRAY/Image-Size-3"
+  osname: "hpux"
+patches:
+  - "../../patches/Image-Size-3.300.patch"

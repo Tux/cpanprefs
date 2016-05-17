@@ -1,0 +1,13 @@
+--- t/all.t	2015-02-28 18:00:55.000000000 +0100
++++ t/all.t	2016-05-17 17:10:45.872174673 +0200
+@@ -65,7 +65,10 @@ ok(($x == 638 && $y == 949 && $id eq 'EM
+ 
+ # Test WEBP code from Baldur Kristinsson
+ ($x, $y, $id) = imgsize("${dir}1.sm.webp");
++SKIP: {
++skip "HP-UX does not support WEBP", 1 if $^O eq "hpux";
+ ok(($x == 320 && $y == 214 && $id eq 'WEBP'), 'Basic WEBP format test');
++}
+ 
+ # Test ICO code from Baldur Kristinsson
+ ($x, $y, $id) = imgsize("${dir}tux.ico");
