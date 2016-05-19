@@ -1,0 +1,48 @@
+diff -purd a/Inotify2.pm b/Inotify2.pm
+--- a/Inotify2.pm	2011-06-14 08:41:39.000000000 +0200
++++ b/Inotify2.pm	2016-05-19 14:57:38.394759742 +0200
+@@ -79,7 +79,8 @@ use Carp ();
+ use Fcntl ();
+ use Scalar::Util ();
+ 
+-use common::sense;
++use strict;
++use warnings;
+ 
+ use base 'Exporter';
+ 
+@@ -367,6 +368,8 @@ sub fullname {
+ }
+ 
+ for my $name (@Linux::Inotify2::EXPORT) {
++   no strict "refs";
++
+    my $mask = &{"Linux::Inotify2::$name"};
+ 
+    *$name = sub { $_[0]{mask} & $mask };
+diff -purd a/Makefile.PL b/Makefile.PL
+--- a/Makefile.PL	2009-09-21 10:08:20.000000000 +0200
++++ b/Makefile.PL	2016-05-19 14:55:58.202062258 +0200
+@@ -8,9 +8,6 @@ my $mm = MM->new({
+ 	            },
+     NAME         => "Linux::Inotify2",
+     VERSION_FROM => "Inotify2.pm",
+-    PREREQ_PM    => {
+-       common::sense => 0,
+-    },
+ });
+ 
+ $mm->flush;
+diff -purd a/META.json b/META.json
+--- a/META.json	2011-06-14 08:41:43.000000000 +0200
++++ b/META.json	2016-05-19 14:56:26.546259616 +0200
+@@ -18,9 +18,6 @@
+    "build_requires" : {
+       "ExtUtils::MakeMaker" : 0
+    },
+-   "requires" : {
+-      "common::sense" : 0
+-   },
+    "abstract" : null,
+    "configure_requires" : {
+       "ExtUtils::MakeMaker" : 0

@@ -1,0 +1,6 @@
+---
+comment: "please use File::ChangeNotify instead"
+match:
+  distribution: '^MLEHMANN/Linux-Inotify2'
+patches:
+  - "../../patches/Linux-Inotify2.patch"

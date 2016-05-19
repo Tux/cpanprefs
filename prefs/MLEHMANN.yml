@@ -1,5 +1,5 @@
 ---
 comment: "use common sense"
 match:
-    distribution: "^MLEHMANN/(?!JSON-XS|Types-Serialiser)"
+    distribution: "^MLEHMANN/(?!JSON-XS|Types-Serialiser|Linux-Inotify2)"
 disabled: 1
