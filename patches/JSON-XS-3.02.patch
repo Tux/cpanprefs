@@ -1,7 +1,7 @@
 diff -purd a/Changes b/Changes
---- a/Changes	2016-11-16 20:21:23.000000000 +0100
-+++ b/Changes	2016-11-17 13:20:35.407173718 +0100
-@@ -102,7 +102,6 @@ TODO: Victor Efimov
+--- a/Changes	2016-02-26 22:46:02.000000000 +0100
++++ b/Changes	2016-03-09 09:17:34.587605179 +0100
+@@ -94,7 +94,6 @@ TODO: investigate magic (Eric Brine)
            around the issue.
  	- ignore RMAGICAL hashes w.r.t. CANONICAL.
  	- try to work around a possible char signedness issue on aix.
@@ -10,8 +10,8 @@ diff -purd a/Changes b/Changes
  2.24  Sat May 30 08:25:45 CEST 2009
  	- the incremental parser did not update its parse offset
 diff -purd a/Makefile.PL b/Makefile.PL
---- a/Makefile.PL	2016-04-25 21:04:54.000000000 +0200
-+++ b/Makefile.PL	2016-11-17 13:20:35.407173718 +0100
+--- a/Makefile.PL	2016-02-26 22:44:29.000000000 +0100
++++ b/Makefile.PL	2016-03-09 09:26:04.140142432 +0100
 @@ -1,8 +1,6 @@
  use 5.008003;
  use ExtUtils::MakeMaker;
@@ -44,8 +44,8 @@ diff -purd a/Makefile.PL b/Makefile.PL
 +	q{};
 +    } # postamble
 diff -purd a/META.json b/META.json
---- a/META.json	2016-11-16 20:21:42.000000000 +0100
-+++ b/META.json	2016-11-17 13:20:35.407173718 +0100
+--- a/META.json	2016-02-26 22:46:28.000000000 +0100
++++ b/META.json	2016-03-09 09:24:48.092317363 +0100
 @@ -27,14 +27,12 @@
        },
        "configure" : {
@@ -62,8 +62,8 @@ diff -purd a/META.json b/META.json
        }
     },
 diff -purd a/META.yml b/META.yml
---- a/META.yml	2016-11-16 20:21:42.000000000 +0100
-+++ b/META.yml	2016-11-17 13:21:20.367295733 +0100
+--- a/META.yml	2016-02-26 22:46:28.000000000 +0100
++++ b/META.yml	2016-03-09 09:24:51.802357625 +0100
 @@ -5,7 +5,6 @@ author:
  build_requires:
    ExtUtils::MakeMaker: '0'
@@ -77,10 +77,10 @@ diff -purd a/META.yml b/META.yml
  requires:
    Types::Serialiser: '0'
 -  common::sense: '0'
- version: 3.03
+ version: 3.02
 diff -purd a/t/06_pc_pretty.t b/t/06_pc_pretty.t
 --- a/t/06_pc_pretty.t	2009-09-08 02:37:43.000000000 +0200
-+++ b/t/06_pc_pretty.t	2016-11-17 13:20:35.407173718 +0100
++++ b/t/06_pc_pretty.t	2016-03-09 09:17:34.588605190 +0100
 @@ -23,8 +23,8 @@ is($js,q|[
     "hoge",
     {
@@ -126,7 +126,7 @@ diff -purd a/t/06_pc_pretty.t b/t/06_pc_pretty.t
  
 diff -purd a/t/11_pc_expo.t b/t/11_pc_expo.t
 --- a/t/11_pc_expo.t	2011-08-17 14:10:34.000000000 +0200
-+++ b/t/11_pc_expo.t	2016-11-17 13:20:35.407173718 +0100
++++ b/t/11_pc_expo.t	2016-03-09 09:17:34.588605190 +0100
 @@ -28,9 +28,9 @@ $js = $pc->encode($obj);
  is($js,'[0.000123]', 'digit 1.23E-4');
  
@@ -141,8 +141,8 @@ diff -purd a/t/11_pc_expo.t b/t/11_pc_expo.t
 +like($js,qr/\[1.01[Ee]\+0?60\]/, 'digit 1.01e+60');
  
 diff -purd a/XS.pm b/XS.pm
---- a/XS.pm	2016-11-16 20:21:40.000000000 +0100
-+++ b/XS.pm	2016-11-17 13:20:35.407173718 +0100
+--- a/XS.pm	2016-02-26 22:46:21.000000000 +0100
++++ b/XS.pm	2016-03-09 09:17:34.588605190 +0100
 @@ -101,7 +101,8 @@ stuff). Or you can combine those feature
  
  package JSON::XS;
@@ -151,12 +151,12 @@ diff -purd a/XS.pm b/XS.pm
 +use strict;
 +use warnings;
  
- our $VERSION = 3.03;
+ our $VERSION = 3.02;
  our @ISA = qw(Exporter);
 diff -purd a/XS.xs b/XS.xs
---- a/XS.xs	2016-11-16 20:16:28.000000000 +0100
-+++ b/XS.xs	2016-11-17 13:20:35.407173718 +0100
-@@ -565,6 +565,11 @@ encode_av (enc_t *enc, AV *av)
+--- a/XS.xs	2016-02-26 22:41:10.000000000 +0100
++++ b/XS.xs	2016-03-09 09:17:34.589605200 +0100
+@@ -563,6 +563,11 @@ encode_av (enc_t *enc, AV *av)
        encode_nl (enc); --enc->indent; encode_indent (enc);
      }
  
@@ -168,7 +168,7 @@ diff -purd a/XS.xs b/XS.xs
    encode_ch (enc, ']');
  }
  
-@@ -733,6 +738,11 @@ encode_hv (enc_t *enc, HV *hv)
+@@ -731,6 +736,11 @@ encode_hv (enc_t *enc, HV *hv)
            }
      }
  

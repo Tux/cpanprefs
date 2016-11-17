@@ -1,6 +1,6 @@
 ---
 comment: "use common sense"
 match:
-  distribution: '^MLEHMANN/JSON-XS'
+  distribution: '^MLEHMANN/JSON-XS-3.(0[3-9]|1*)'
 patches:
   - "../../patches/JSON-XS.patch"
