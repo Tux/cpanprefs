@@ -1,0 +1,978 @@
+diff -purd a/Changes b/Changes
+--- a/Changes	2017-08-17 04:31:27.000000000 +0200
++++ b/Changes	2017-08-27 10:53:21.409219971 +0200
+@@ -114,7 +114,6 @@ TODO: move json_xs to types::serialiser
+           around the issue.
+ 	- ignore RMAGICAL hashes w.r.t. CANONICAL.
+ 	- try to work around a possible char signedness issue on aix.
+-        - require common sense.
+ 
+ 2.24  Sat May 30 08:25:45 CEST 2009
+ 	- the incremental parser did not update its parse offset
+diff -purd a/Makefile.PL b/Makefile.PL
+--- a/Makefile.PL	2016-04-25 21:04:54.000000000 +0200
++++ b/Makefile.PL	2017-08-27 10:53:21.409219971 +0200
+@@ -1,8 +1,6 @@
+ use 5.008003;
+ use ExtUtils::MakeMaker;
+ 
+-use Canary::Stability JSON::XS => 1, 5.008003;
+-
+ WriteMakefile(
+     dist	 => {
+ 	             PREOP	=> 'pod2text XS.pm | tee README >$(DISTVNAME)/README; chmod -R u=rwX,go=rX . ;',
+@@ -13,9 +11,19 @@ WriteMakefile(
+     VERSION_FROM => "XS.pm",
+     NAME         => "JSON::XS",
+     PREREQ_PM    => {
+-       common::sense     => 0,
+        Types::Serialiser => 0,
+     },
+-    CONFIGURE_REQUIRES => { ExtUtils::MakeMaker => 6.52, Canary::Stability => 0 },
++    CONFIGURE_REQUIRES => { ExtUtils::MakeMaker => 6.52 },
+ );
+ 
++1;
++
++package MY;
++
++sub postamble
++{
++    join "\n" =>
++	q{XS.xs: Makefile}, # must use $$ as make will reduce that to $
++	q{	perl -pi -e's,//+\s*(.*),/* $$1 */,' XS.xs},
++	q{};
++    } # postamble
+diff -purd a/META.json b/META.json
+--- a/META.json	2017-08-17 05:47:47.000000000 +0200
++++ b/META.json	2017-08-27 10:53:21.409219971 +0200
+@@ -27,14 +27,12 @@
+       },
+       "configure" : {
+          "requires" : {
+-            "Canary::Stability" : "0",
+             "ExtUtils::MakeMaker" : "6.52"
+          }
+       },
+       "runtime" : {
+          "requires" : {
+-            "Types::Serialiser" : "0",
+-            "common::sense" : "0"
++            "Types::Serialiser" : "0"
+          }
+       }
+    },
+diff -purd a/META.yml b/META.yml
+--- a/META.yml	2017-08-17 05:47:47.000000000 +0200
++++ b/META.yml	2017-08-27 10:53:21.409219971 +0200
+@@ -5,7 +5,6 @@ author:
+ build_requires:
+   ExtUtils::MakeMaker: '0'
+ configure_requires:
+-  Canary::Stability: '0'
+   ExtUtils::MakeMaker: '6.52'
+ dynamic_config: 1
+ generated_by: 'ExtUtils::MakeMaker version 7.3, CPAN::Meta::Converter version 2.150010'
+@@ -20,6 +19,5 @@ no_index:
+     - inc
+ requires:
+   Types::Serialiser: '0'
+-  common::sense: '0'
+ version: 3.04
+ x_serialization_backend: 'CPAN::Meta::YAML version 0.012'
+diff -purd a/t/06_pc_pretty.t b/t/06_pc_pretty.t
+--- a/t/06_pc_pretty.t	2009-09-08 02:37:43.000000000 +0200
++++ b/t/06_pc_pretty.t	2017-08-27 10:53:21.409219971 +0200
+@@ -23,8 +23,8 @@ is($js,q|[
+    "hoge",
+    {
+       "foo" : "bar"
+-   }
+-]
++      }
++   ]
+ |);
+ 
+ $obj = { foo => [ {a=>"b"}, 0, 1, 2 ] };
+@@ -40,12 +40,12 @@ is($js,q|{
+    "foo" : [
+       {
+          "a" : "b"
+-      },
++         },
+       0,
+       1,
+       2
+-   ]
+-}
++      ]
++   }
+ |);
+ 
+ $obj = { foo => [ {a=>"b"}, 0, 1, 2 ] };
+@@ -56,11 +56,11 @@ is($js,q|{"foo":[{"a":"b"},0,1,2]}|);
+ 
+ $obj = {foo => "bar"};
+ $pc->indent(1);
+-is($pc->encode($obj), qq|{\n   "foo":"bar"\n}\n|, "nospace");
++is($pc->encode($obj), qq|{\n   "foo":"bar"\n   }\n|, "nospace");
+ $pc->space_after(1);
+-is($pc->encode($obj), qq|{\n   "foo": "bar"\n}\n|, "after");
++is($pc->encode($obj), qq|{\n   "foo": "bar"\n   }\n|, "after");
+ $pc->space_before(1);
+-is($pc->encode($obj), qq|{\n   "foo" : "bar"\n}\n|, "both");
++is($pc->encode($obj), qq|{\n   "foo" : "bar"\n   }\n|, "both");
+ $pc->space_after(0);
+-is($pc->encode($obj), qq|{\n   "foo" :"bar"\n}\n|, "before");
++is($pc->encode($obj), qq|{\n   "foo" :"bar"\n   }\n|, "before");
+ 
+diff -purd a/t/11_pc_expo.t b/t/11_pc_expo.t
+--- a/t/11_pc_expo.t	2011-08-17 14:10:34.000000000 +0200
++++ b/t/11_pc_expo.t	2017-08-27 10:53:21.409219971 +0200
+@@ -28,9 +28,9 @@ $js = $pc->encode($obj);
+ is($js,'[0.000123]', 'digit 1.23E-4');
+ 
+ 
+-$js  = q|[1.01e+30]|;
++$js  = q|[1.01e+60]|;
+ $obj = $pc->decode($js);
+-is($obj->[0], 1.01e+30, 'digit 1.01e+30');
++is($obj->[0], 1.01e+60, 'digit 1.01e+60');
+ $js = $pc->encode($obj);
+-like($js,qr/\[1.01[Ee]\+0?30\]/, 'digit 1.01e+30');
++like($js,qr/\[1.01[Ee]\+0?60\]/, 'digit 1.01e+60');
+ 
+diff -purd a/XS.pm b/XS.pm
+--- a/XS.pm	2017-08-17 04:31:35.000000000 +0200
++++ b/XS.pm	2017-08-27 10:53:21.409219971 +0200
+@@ -101,7 +101,8 @@ stuff). Or you can combine those feature
+ 
+ package JSON::XS;
+ 
+-use common::sense;
++use strict;
++use warnings;
+ 
+ our $VERSION = 3.04;
+ our @ISA = qw(Exporter);
+diff -purd a/XS.xs b/XS.xs
+--- a/XS.xs	2017-08-17 03:54:33.000000000 +0200
++++ b/XS.xs	2017-08-27 10:54:27.325999114 +0200
+@@ -11,16 +11,16 @@
+ #include <inttypes.h>
+ 
+ #if defined(__BORLANDC__) || defined(_MSC_VER)
+-# define snprintf _snprintf // C compilers have this in stdio.h
++# define snprintf _snprintf /* C compilers have this in stdio.h */
+ #endif
+ 
+-// some old perls do not have this, try to make it work, no
+-// guarantees, though. if it breaks, you get to keep the pieces.
++/* some old perls do not have this, try to make it work, no */
++/* guarantees, though. if it breaks, you get to keep the pieces. */
+ #ifndef UTF8_MAXBYTES
+ # define UTF8_MAXBYTES 13
+ #endif
+ 
+-// compatibility with perl <5.18
++/* compatibility with perl <5.18 */
+ #ifndef HvNAMELEN_get
+ # define HvNAMELEN_get(hv) strlen (HvNAME (hv))
+ #endif
+@@ -31,7 +31,7 @@
+ # define HvNAMEUTF8(hv) 0
+ #endif
+ 
+-// three extra for rounding, sign, and end of string
++/* three extra for rounding, sign, and end of string */
+ #define IVUV_MAXCHARS (sizeof (UV) * CHAR_BIT * 28 / 93 + 3)
+ 
+ #define F_ASCII          0x00000001UL
+@@ -48,14 +48,14 @@
+ #define F_RELAXED        0x00001000UL
+ #define F_ALLOW_UNKNOWN  0x00002000UL
+ #define F_ALLOW_TAGS     0x00004000UL
+-#define F_HOOK           0x00080000UL // some hooks exist, so slow-path processing
++#define F_HOOK           0x00080000UL /* some hooks exist, so slow-path processing */
+ 
+ #define F_PRETTY    F_INDENT | F_SPACE_BEFORE | F_SPACE_AFTER
+ 
+-#define INIT_SIZE   32 // initial scalar size to be allocated
+-#define INDENT_STEP 3  // spaces per indentation level
++#define INIT_SIZE   32 /* initial scalar size to be allocated */
++#define INDENT_STEP 3  /* spaces per indentation level */
+ 
+-#define SHORT_STRING_LEN 16384 // special-case strings of up to this size
++#define SHORT_STRING_LEN 16384 /* special-case strings of up to this size */
+ 
+ #define DECODE_WANTS_OCTETS(json) ((json)->flags & F_UTF8)
+ 
+@@ -89,19 +89,19 @@
+ # define BOOL_STASH bool_stash
+ #endif
+ 
+-// the amount of HEs to allocate on the stack, when sorting keys
++/* the amount of HEs to allocate on the stack, when sorting keys */
+ #define STACK_HES 64
+ 
+-static HV *json_stash, *bool_stash; // JSON::XS::, Types::Serialiser::Boolean::
++static HV *json_stash, *bool_stash; /* JSON::XS::, Types::Serialiser::Boolean:: */
+ static SV *bool_true, *bool_false, *sv_json;
+ 
+ enum {
+-  INCR_M_WS = 0, // initial whitespace skipping, must be 0
+-  INCR_M_STR,    // inside string
+-  INCR_M_BS,     // inside backslash
+-  INCR_M_C0,     // inside comment in initial whitespace sequence
+-  INCR_M_C1,     // inside comment in other places
+-  INCR_M_JSON    // outside anything, count nesting
++  INCR_M_WS = 0, /* initial whitespace skipping, must be 0 */
++  INCR_M_STR,    /* inside string */
++  INCR_M_BS,     /* inside backslash */
++  INCR_M_C0,     /* inside comment in initial whitespace sequence */
++  INCR_M_C1,     /* inside comment in other places */
++  INCR_M_JSON    /* outside anything, count nesting */
+ };
+ 
+ #define INCR_DONE(json) ((json)->incr_nest <= 0 && (json)->incr_mode == INCR_M_JSON)
+@@ -114,10 +114,10 @@ typedef struct {
+   SV *cb_object;
+   HV *cb_sk_object;
+ 
+-  // for the incremental parser
+-  SV *incr_text;   // the source text so far
+-  STRLEN incr_pos; // the current offset into the text
+-  int incr_nest;   // {[]}-nesting level
++  /* for the incremental parser */
++  SV *incr_text;   /* the source text so far */
++  STRLEN incr_pos; /* the current offset into the text */
++  int incr_nest;   /* {[]}-nesting level */
+   unsigned char incr_mode;
+ } JSON;
+ 
+@@ -128,8 +128,7 @@ json_init (JSON *json)
+   json->max_depth = 512;
+ }
+ 
+-/////////////////////////////////////////////////////////////////////////////
+-// utility functions
++/* utility functions */
+ 
+ INLINE SV *
+ get_bool (const char *name)
+@@ -182,11 +181,11 @@ json_sv_grow (SV *sv, size_t len1, size_
+   return SvGROW (sv, len1);
+ }
+ 
+-// decode an utf-8 character and return it, or (UV)-1 in
+-// case of an error.
+-// we special-case "safe" characters from U+80 .. U+7FF,
+-// but use the very good perl function to parse anything else.
+-// note that we never call this function for a ascii codepoints
++/* decode an utf-8 character and return it, or (UV)-1 in */
++/* case of an error. */
++/* we special-case "safe" characters from U+80 .. U+7FF, */
++/* but use the very good perl function to parse anything else. */
++/* note that we never call this function for a ascii codepoints */
+ INLINE UV
+ decode_utf8 (unsigned char *s, STRLEN len, STRLEN *clen)
+ {
+@@ -201,9 +200,9 @@ decode_utf8 (unsigned char *s, STRLEN le
+     return utf8n_to_uvuni (s, len, clen, UTF8_CHECK_ONLY);
+ }
+ 
+-// likewise for encoding, also never called for ascii codepoints
+-// this function takes advantage of this fact, although current gccs
+-// seem to optimise the check for >= 0x80 away anyways
++/* likewise for encoding, also never called for ascii codepoints */
++/* this function takes advantage of this fact, although current gccs */
++/* seem to optimise the check for >= 0x80 away anyways */
+ INLINE unsigned char *
+ encode_utf8 (unsigned char *s, UV ch)
+ {
+@@ -225,7 +224,7 @@ encode_utf8 (unsigned char *s, UV ch)
+   return s;
+ }
+ 
+-// convert offset pointer to character index, sv must be string
++/* convert offset pointer to character index, sv must be string */
+ static STRLEN
+ ptr_to_index (SV *sv, char *offset)
+ {
+@@ -234,18 +233,17 @@ ptr_to_index (SV *sv, char *offset)
+          : offset - SvPVX (sv);
+ }
+ 
+-/////////////////////////////////////////////////////////////////////////////
+-// fp hell
++/* fp hell */
+ 
+-// scan a group of digits, and a trailing exponent
++/* scan a group of digits, and a trailing exponent */
+ static void
+ json_atof_scan1 (const char *s, NV *accum, int *expo, int postdp, int maxdepth)
+ {
+   UV  uaccum = 0;
+   int eaccum = 0;
+ 
+-  // if we recurse too deep, skip all remaining digits
+-  // to avoid a stack overflow attack
++  /* if we recurse too deep, skip all remaining digits */
++  /* to avoid a stack overflow attack */
+   if (expect_false (--maxdepth <= 0))
+     while (((U8)*s - '0') < 10)
+       ++s;
+@@ -290,8 +288,8 @@ json_atof_scan1 (const char *s, NV *accu
+       uaccum = uaccum * 10 + dig;
+       ++eaccum;
+ 
+-      // if we have too many digits, then recurse for more
+-      // we actually do this for rather few digits
++      /* if we have too many digits, then recurse for more */
++      /* we actually do this for rather few digits */
+       if (uaccum >= (UV_MAX - 9) / 10)
+         {
+           if (postdp) *expo -= eaccum;
+@@ -302,10 +300,10 @@ json_atof_scan1 (const char *s, NV *accu
+         }
+     }
+ 
+-  // this relies greatly on the quality of the pow ()
+-  // implementation of the platform, but a good
+-  // implementation is hard to beat.
+-  // (IEEE 754 conformant ones are required to be exact)
++  /* this relies greatly on the quality of the pow () */
++  /* implementation of the platform, but a good */
++  /* implementation is hard to beat. */
++  /* (IEEE 754 conformant ones are required to be exact) */
+   if (postdp) *expo -= eaccum;
+   *accum += uaccum * Perl_pow (10., *expo);
+   *expo += eaccum;
+@@ -324,13 +322,13 @@ json_atof (const char *s)
+       neg = 1;
+     }
+ 
+-  // a recursion depth of ten gives us >>500 bits
++  /* a recursion depth of ten gives us >>500 bits */
+   json_atof_scan1 (s, &accum, &expo, 0, 10);
+ 
+   return neg ? -accum : accum;
+ }
+ 
+-// target of scalar reference is bool?  -1 == nope, 0 == false, 1 == true
++/* target of scalar reference is bool?  -1 == nope, 0 == false, 1 == true */
+ static int
+ ref_bool_type (SV *sv)
+ {
+@@ -351,7 +349,7 @@ ref_bool_type (SV *sv)
+   return -1;
+ }
+ 
+-// returns whether scalar is not a reference in the sense of allow_nonref
++/* returns whether scalar is not a reference in the sense of allow_nonref */
+ static int
+ json_nonref (SV *scalar)
+ {
+@@ -372,18 +370,17 @@ json_nonref (SV *scalar)
+   return 0;
+ }
+ 
+-/////////////////////////////////////////////////////////////////////////////
+-// encoder
++/* encoder */
+ 
+-// structure used for encoding JSON
++/* structure used for encoding JSON */
+ typedef struct
+ {
+-  char *cur;  // SvPVX (sv) + current output position
+-  char *end;  // SvEND (sv)
+-  SV *sv;     // result scalar
++  char *cur;  /* SvPVX (sv) + current output position */
++  char *end;  /* SvEND (sv) */
++  SV *sv;     /* result scalar */
+   JSON json;
+-  U32 indent; // indentation level
+-  UV limit;   // escape character values >= this value when encoding
++  U32 indent; /* indentation level */
++  UV limit;   /* escape character values >= this value when encoding */
+ } enc_t;
+ 
+ INLINE void
+@@ -416,9 +413,9 @@ encode_str (enc_t *enc, char *str, STRLE
+     {
+       unsigned char ch = *(unsigned char *)str;
+ 
+-      if (expect_true (ch >= 0x20 && ch < 0x80)) // most common case
++      if (expect_true (ch >= 0x20 && ch < 0x80)) /* most common case */
+         {
+-          if (expect_false (ch == '"')) // but with slow exceptions
++          if (expect_false (ch == '"')) /* but with slow exceptions */
+             {
+               need (enc, len + 1);
+               *enc->cur++ = '\\';
+@@ -504,7 +501,7 @@ encode_str (enc_t *enc, char *str, STRLE
+                     }
+                   else
+                     {
+-                      need (enc, len + UTF8_MAXBYTES - 1); // never more than 11 bytes needed
++                      need (enc, len + UTF8_MAXBYTES - 1); /* never more than 11 bytes needed */
+                       enc->cur = encode_utf8 (enc->cur, uch);
+                       ++str;
+                     }
+@@ -591,6 +588,11 @@ encode_av (enc_t *enc, AV *av)
+       encode_nl (enc); --enc->indent; encode_indent (enc);
+     }
+ 
++  if (enc->json.flags & F_INDENT) { /* pretty, so indent! */
++      encode_ch (enc, ' ');
++      encode_ch (enc, ' ');
++      encode_ch (enc, ' ');
++      }
+   encode_ch (enc, ']');
+ }
+ 
+@@ -620,7 +622,7 @@ encode_hk (enc_t *enc, HE *he)
+   if (enc->json.flags & F_SPACE_AFTER ) encode_space (enc);
+ }
+ 
+-// compare hash entries, used when all keys are bytestrings
++/* compare hash entries, used when all keys are bytestrings */
+ static int
+ he_cmp_fast (const void *a_, const void *b_)
+ {
+@@ -638,7 +640,7 @@ he_cmp_fast (const void *a_, const void
+   return cmp;
+ }
+ 
+-// compare hash entries, used when some keys are sv's or utf-x
++/* compare hash entries, used when some keys are sv's or utf-x */
+ static int
+ he_cmp_slow (const void *a, const void *b)
+ {
+@@ -655,20 +657,20 @@ encode_hv (enc_t *enc, HV *hv)
+ 
+   encode_ch (enc, '{');
+ 
+-  // for canonical output we have to sort by keys first
+-  // actually, this is mostly due to the stupid so-called
+-  // security workaround added somewhere in 5.8.x
+-  // that randomises hash orderings
++  /* for canonical output we have to sort by keys first */
++  /* actually, this is mostly due to the stupid so-called */
++  /* security workaround added somewhere in 5.8.x */
++  /* that randomises hash orderings */
+   if (enc->json.flags & F_CANONICAL && !SvRMAGICAL (hv))
+     {
+       int count = hv_iterinit (hv);
+ 
+       if (SvMAGICAL (hv))
+         {
+-          // need to count by iterating. could improve by dynamically building the vector below
+-          // but I don't care for the speed of this special case.
+-          // note also that we will run into undefined behaviour when the two iterations
+-          // do not result in the same count, something I might care for in some later release.
++          /* need to count by iterating. could improve by dynamically building the vector below */
++          /* but I don't care for the speed of this special case. */
++          /* note also that we will run into undefined behaviour when the two iterations */
++          /* do not result in the same count, something I might care for in some later release. */
+ 
+           count = 0;
+           while (hv_iternext (hv))
+@@ -683,7 +685,7 @@ encode_hv (enc_t *enc, HV *hv)
+           HE *hes_stack [STACK_HES];
+           HE **hes = hes_stack;
+ 
+-          // allocate larger arrays on the heap
++          /* allocate larger arrays on the heap */
+           if (count > STACK_HES)
+             {
+               SV *sv = sv_2mortal (NEWSV (0, count * sizeof (*hes)));
+@@ -704,7 +706,7 @@ encode_hv (enc_t *enc, HV *hv)
+             qsort (hes, count, sizeof (HE *), he_cmp_fast);
+           else
+             {
+-              // hack to forcefully disable "use bytes"
++              /* hack to forcefully disable "use bytes" */
+               COP cop = *PL_curcop;
+               cop.op_private = 0;
+ 
+@@ -759,10 +761,15 @@ encode_hv (enc_t *enc, HV *hv)
+           }
+     }
+ 
++  if (enc->json.flags & F_INDENT) { /* pretty, so indent! */
++      encode_ch (enc, ' ');
++      encode_ch (enc, ' ');
++      encode_ch (enc, ' ');
++      }
+   encode_ch (enc, '}');
+ }
+ 
+-// encode objects, arrays and special \0=false and \1=true values.
++/* encode objects, arrays and special \0=false and \1=true values. */
+ static void
+ encode_rv (enc_t *enc, SV *sv)
+ {
+@@ -792,7 +799,7 @@ encode_rv (enc_t *enc, SV *sv)
+           SAVESTACK_POS ();
+           PUSHMARK (SP);
+           EXTEND (SP, 2);
+-          // we re-bless the reference to get overload and other niceties right
++          /* we re-bless the reference to get overload and other niceties right */
+           PUSHs (sv_bless (sv_2mortal (newRV_inc (sv)), stash));
+           PUSHs (sv_json);
+ 
+@@ -800,7 +807,7 @@ encode_rv (enc_t *enc, SV *sv)
+           count = call_sv ((SV *)GvCV (method), G_ARRAY);
+           SPAGAIN;
+ 
+-          // catch this surprisingly common error
++          /* catch this surprisingly common error */
+           if (SvROK (TOPs) && SvRV (TOPs) == sv)
+             croak ("%s::FREEZE method returned same object as was passed instead of a new one", HvNAME (SvSTASH (sv)));
+ 
+@@ -829,15 +836,15 @@ encode_rv (enc_t *enc, SV *sv)
+ 
+           ENTER; SAVETMPS;
+           PUSHMARK (SP);
+-          // we re-bless the reference to get overload and other niceties right
++          /* we re-bless the reference to get overload and other niceties right */
+           XPUSHs (sv_bless (sv_2mortal (newRV_inc (sv)), stash));
+ 
+-          // calling with G_SCALAR ensures that we always get a 1 return value
++          /* calling with G_SCALAR ensures that we always get a 1 return value */
+           PUTBACK;
+           call_sv ((SV *)GvCV (method), G_SCALAR);
+           SPAGAIN;
+ 
+-          // catch this surprisingly common error
++          /* catch this surprisingly common error */
+           if (SvROK (TOPs) && SvRV (TOPs) == sv)
+             croak ("%s::TO_JSON method returned same object as was passed instead of a new one", HvNAME (SvSTASH (sv)));
+ 
+@@ -894,22 +901,22 @@ encode_sv (enc_t *enc, SV *sv)
+     }
+   else if (SvNOKp (sv))
+     {
+-      // trust that perl will do the right thing w.r.t. JSON syntax.
++      /* trust that perl will do the right thing w.r.t. JSON syntax. */
+       need (enc, NV_DIG + 32);
+       Gconvert (SvNVX (sv), NV_DIG, 0, enc->cur);
+       enc->cur += strlen (enc->cur);
+     }
+   else if (SvIOKp (sv))
+     {
+-      // we assume we can always read an IV as a UV and vice versa
+-      // we assume two's complement
+-      // we assume no aliasing issues in the union
++      /* we assume we can always read an IV as a UV and vice versa */
++      /* we assume two's complement */
++      /* we assume no aliasing issues in the union */
+       if (SvIsUV (sv) ? SvUVX (sv) <= 59000
+                       : SvIVX (sv) <= 59000 && SvIVX (sv) >= -59000)
+         {
+-          // optimise the "small number case"
+-          // code will likely be branchless and use only a single multiplication
+-          // works for numbers up to 59074
++          /* optimise the "small number case" */
++          /* code will likely be branchless and use only a single multiplication */
++          /* works for numbers up to 59074 */
+           I32 i = SvIVX (sv);
+           U32 u;
+           char digit, nz = 0;
+@@ -919,23 +926,23 @@ encode_sv (enc_t *enc, SV *sv)
+           *enc->cur = '-'; enc->cur += i < 0 ? 1 : 0;
+           u = i < 0 ? -i : i;
+ 
+-          // convert to 4.28 fixed-point representation
+-          u = u * ((0xfffffff + 10000) / 10000); // 10**5, 5 fractional digits
++          /* convert to 4.28 fixed-point representation */
++          u = u * ((0xfffffff + 10000) / 10000); /* 10**5, 5 fractional digits */
+ 
+-          // now output digit by digit, each time masking out the integer part
+-          // and multiplying by 5 while moving the decimal point one to the right,
+-          // resulting in a net multiplication by 10.
+-          // we always write the digit to memory but conditionally increment
+-          // the pointer, to enable the use of conditional move instructions.
++          /* now output digit by digit, each time masking out the integer part */
++          /* and multiplying by 5 while moving the decimal point one to the right, */
++          /* resulting in a net multiplication by 10. */
++          /* we always write the digit to memory but conditionally increment */
++          /* the pointer, to enable the use of conditional move instructions. */
+           digit = u >> 28; *enc->cur = digit + '0'; enc->cur += (nz = nz || digit); u = (u & 0xfffffffUL) * 5;
+           digit = u >> 27; *enc->cur = digit + '0'; enc->cur += (nz = nz || digit); u = (u & 0x7ffffffUL) * 5;
+           digit = u >> 26; *enc->cur = digit + '0'; enc->cur += (nz = nz || digit); u = (u & 0x3ffffffUL) * 5;
+           digit = u >> 25; *enc->cur = digit + '0'; enc->cur += (nz = nz || digit); u = (u & 0x1ffffffUL) * 5;
+-          digit = u >> 24; *enc->cur = digit + '0'; enc->cur += 1; // correctly generate '0'
++          digit = u >> 24; *enc->cur = digit + '0'; enc->cur += 1; /* correctly generate '0' */
+         }
+       else
+         {
+-          // large integer, use the (rather slow) snprintf way.
++          /* large integer, use the (rather slow) snprintf way. */
+           need (enc, IVUV_MAXCHARS);
+           enc->cur +=
+              SvIsUV(sv)
+@@ -974,7 +981,7 @@ encode_json (SV *scalar, JSON *json)
+   encode_nl (&enc);
+ 
+   SvCUR_set (enc.sv, enc.cur - SvPVX (enc.sv));
+-  *SvEND (enc.sv) = 0; // many xs functions expect a trailing 0 for text strings
++  *SvEND (enc.sv) = 0; /* many xs functions expect a trailing 0 for text strings */
+ 
+   if (!(enc.json.flags & (F_ASCII | F_LATIN1 | F_UTF8)))
+     SvUTF8_on (enc.sv);
+@@ -985,24 +992,23 @@ encode_json (SV *scalar, JSON *json)
+   return enc.sv;
+ }
+ 
+-/////////////////////////////////////////////////////////////////////////////
+-// decoder
++/* decoder */
+ 
+-// structure used for decoding JSON
++/* structure used for decoding JSON */
+ typedef struct
+ {
+-  char *cur; // current parser pointer
+-  char *end; // end of input string
+-  const char *err; // parse error, if != 0
++  char *cur; /* current parser pointer */
++  char *end; /* end of input string */
++  const char *err; /* parse error, if != 0 */
+   JSON json;
+-  U32 depth; // recursion depth
+-  U32 maxdepth; // recursion depth limit
++  U32 depth; /* recursion depth */
++  U32 maxdepth; /* recursion depth limit */
+ } dec_t;
+ 
+ INLINE void
+ decode_comment (dec_t *dec)
+ {
+-  // only '#'-style comments allowed a.t.m.
++  /* only '#'-style comments allowed a.t.m. */
+ 
+   while (*dec->cur && *dec->cur != 0x0a && *dec->cur != 0x0d)
+     ++dec->cur;
+@@ -1028,7 +1034,7 @@ decode_ws (dec_t *dec)
+             break;
+         }
+       else if (ch != 0x20 && ch != 0x0a && ch != 0x0d && ch != 0x09)
+-        break; // parse error, but let higher level handle it, gives better error messages
++        break; /* parse error, but let higher level handle it, gives better error messages */
+ 
+       ++dec->cur;
+     }
+@@ -1117,7 +1123,7 @@ decode_str (dec_t *dec)
+                       if (hi == (UV)-1)
+                         goto fail;
+ 
+-                      // possibly a surrogate pair
++                      /* possibly a surrogate pair */
+                       if (hi >= 0xd800)
+                         if (hi < 0xdc00)
+                           {
+@@ -1234,7 +1240,7 @@ decode_num (dec_t *dec)
+   int is_nv = 0;
+   char *start = dec->cur;
+ 
+-  // [minus]
++  /* [minus] */
+   if (*dec->cur == '-')
+     ++dec->cur;
+ 
+@@ -1253,7 +1259,7 @@ decode_num (dec_t *dec)
+       }
+     while (*dec->cur >= '0' && *dec->cur <= '9');
+ 
+-  // [frac]
++  /* [frac] */
+   if (*dec->cur == '.')
+     {
+       ++dec->cur;
+@@ -1270,7 +1276,7 @@ decode_num (dec_t *dec)
+       is_nv = 1;
+     }
+ 
+-  // [exp]
++  /* [exp] */
+   if (*dec->cur == 'e' || *dec->cur == 'E')
+     {
+       ++dec->cur;
+@@ -1294,7 +1300,7 @@ decode_num (dec_t *dec)
+     {
+       int len = dec->cur - start;
+ 
+-      // special case the rather common 1..5-digit-int case
++      /* special case the rather common 1..5-digit-int case */
+       if (*start == '-')
+         switch (len)
+           {
+@@ -1329,16 +1335,16 @@ decode_num (dec_t *dec)
+ 
+       len -= *start == '-' ? 1 : 0;
+ 
+-      // does not fit into IV or UV, try NV
++      /* does not fit into IV or UV, try NV */
+       if (len <= NV_DIG)
+-        // fits into NV without loss of precision
++        /* fits into NV without loss of precision */
+         return newSVnv (json_atof (start));
+ 
+-      // everything else fails, convert it to a string
++      /* everything else fails, convert it to a string */
+       return newSVpvn (start, dec->cur - start);
+     }
+ 
+-  // loss of precision here
++  /* loss of precision here */
+   return newSVnv (json_atof (start));
+ 
+ fail:
+@@ -1413,22 +1419,22 @@ decode_hv (dec_t *dec)
+       {
+         EXPECT_CH ('"');
+ 
+-        // heuristic: assume that
+-        // a) decode_str + hv_store_ent are abysmally slow.
+-        // b) most hash keys are short, simple ascii text.
+-        // => try to "fast-match" such strings to avoid
+-        // the overhead of decode_str + hv_store_ent.
++        /* heuristic: assume that */
++        /* a) decode_str + hv_store_ent are abysmally slow. */
++        /* b) most hash keys are short, simple ascii text. */
++        /* => try to "fast-match" such strings to avoid */
++        /* the overhead of decode_str + hv_store_ent. */
+         {
+           SV *value;
+           char *p = dec->cur;
+-          char *e = p + 24; // only try up to 24 bytes
++          char *e = p + 24; /* only try up to 24 bytes */
+ 
+           for (;;)
+             {
+-              // the >= 0x80 is false on most architectures
++              /* the >= 0x80 is false on most architectures */
+               if (p == e || *p < 0x20 || *p >= 0x80 || *p == '\\')
+                 {
+-                  // slow path, back up and use decode_str
++                  /* slow path, back up and use decode_str */
+                   SV *key = decode_str (dec);
+                   if (!key)
+                     goto fail;
+@@ -1450,7 +1456,7 @@ decode_hv (dec_t *dec)
+                 }
+               else if (*p == '"')
+                 {
+-                  // fast path, got a simple key
++                  /* fast path, got a simple key */
+                   char *key = dec->cur;
+                   int len = p - key;
+                   dec->cur = p + 1;
+@@ -1496,7 +1502,7 @@ decode_hv (dec_t *dec)
+   DEC_DEC_DEPTH;
+   sv = newRV_noinc ((SV *)hv);
+ 
+-  // check filter callbacks
++  /* check filter callbacks */
+   if (dec->json.flags & F_HOOK)
+     {
+       if (dec->json.cb_sk_object && HvKEYS (hv) == 1)
+@@ -1507,8 +1513,8 @@ decode_hv (dec_t *dec)
+           he = hv_iternext (hv);
+           hv_iterinit (hv);
+ 
+-          // the next line creates a mortal sv each time it's called.
+-          // might want to optimise this for common cases.
++          /* the next line creates a mortal sv each time it's called. */
++          /* might want to optimise this for common cases. */
+           cb = hv_fetch_ent (dec->json.cb_sk_object, hv_iterkeysv (he), 0, 0);
+ 
+           if (cb)
+@@ -1623,7 +1629,7 @@ decode_tag (dec_t *dec)
+     ENTER; SAVETMPS;
+     PUSHMARK (SP);
+     EXTEND (SP, len + 2);
+-    // we re-bless the reference to get overload and other niceties right
++    /* we re-bless the reference to get overload and other niceties right */
+     PUSHs (tag);
+     PUSHs (sv_json);
+ 
+@@ -1654,8 +1660,8 @@ fail:
+ static SV *
+ decode_sv (dec_t *dec)
+ {
+-  // the beauty of JSON: you need exactly one character lookahead
+-  // to parse everything.
++  /* the beauty of JSON: you need exactly one character lookahead */
++  /* to parse everything. */
+   switch (*dec->cur)
+     {
+       case '"': ++dec->cur; return decode_str (dec);
+@@ -1763,7 +1769,7 @@ decode_json (SV *string, JSON *json, STR
+   else
+     sv_utf8_upgrade (string);
+ 
+-  SvGROW (string, SvCUR (string) + 1); // should basically be a NOP
++  SvGROW (string, SvCUR (string) + 1); /* should basically be a NOP */
+ 
+   dec.json  = *json;
+   dec.cur   = SvPVX (string);
+@@ -1774,7 +1780,7 @@ decode_json (SV *string, JSON *json, STR
+   if (dec.json.cb_object || dec.json.cb_sk_object)
+     dec.json.flags |= F_HOOK;
+ 
+-  *dec.end = 0; // this should basically be a nop, too, but make sure it's there
++  *dec.end = 0; /* this should basically be a nop, too, but make sure it's there */
+ 
+   decode_ws (&dec);
+   sv = decode_sv (&dec);
+@@ -1783,7 +1789,7 @@ decode_json (SV *string, JSON *json, STR
+     *offset_return = dec.cur - SvPVX (string);
+   else if (sv)
+     {
+-      // check for trailing garbage
++      /* check for trailing garbage */
+       decode_ws (&dec);
+ 
+       if (*dec.cur)
+@@ -1798,7 +1804,7 @@ decode_json (SV *string, JSON *json, STR
+     {
+       SV *uni = sv_newmortal ();
+ 
+-      // horrible hack to silence warning inside pv_uni_display
++      /* horrible hack to silence warning inside pv_uni_display */
+       COP cop = *PL_curcop;
+       cop.cop_warnings = pWARN_NONE;
+       ENTER;
+@@ -1821,23 +1827,22 @@ decode_json (SV *string, JSON *json, STR
+   return sv;
+ }
+ 
+-/////////////////////////////////////////////////////////////////////////////
+-// incremental parser
++/* incremental parser */
+ 
+ static void
+ incr_parse (JSON *self)
+ {
+   const char *p = SvPVX (self->incr_text) + self->incr_pos;
+ 
+-  // the state machine here is a bit convoluted and could be simplified a lot
+-  // but this would make it slower, so...
++  /* the state machine here is a bit convoluted and could be simplified a lot */
++  /* but this would make it slower, so... */
+ 
+   for (;;)
+     {
+-      //printf ("loop pod %d *p<%c><%s>, mode %d nest %d\n", p - SvPVX (self->incr_text), *p, p, self->incr_mode, self->incr_nest);//D
++      /* printf ("loop pod %d *p<%c><%s>, mode %d nest %d\n", p - SvPVX (self->incr_text), *p, p, self->incr_mode, self->incr_nest);/* D */
+       switch (self->incr_mode)
+         {
+-          // only used for initial whitespace skipping
++          /* only used for initial whitespace skipping */
+           case INCR_M_WS:
+             for (;;)
+               {
+@@ -1860,7 +1865,7 @@ incr_parse (JSON *self)
+                 ++p;
+               }
+ 
+-          // skip a single char inside a string (for \\-processing)
++          /* skip a single char inside a string (for \\-processing) */
+           case INCR_M_BS:
+             if (!*p)
+               goto interrupt;
+@@ -1869,7 +1874,7 @@ incr_parse (JSON *self)
+             self->incr_mode = INCR_M_STR;
+             goto incr_m_str;
+ 
+-          // inside #-style comments
++          /* inside #-style comments */
+           case INCR_M_C0:
+           case INCR_M_C1:
+           incr_m_c:
+@@ -1888,7 +1893,7 @@ incr_parse (JSON *self)
+ 
+             break;
+ 
+-          // inside a string
++          /* inside a string */
+           case INCR_M_STR:
+           incr_m_str:
+             for (;;)
+@@ -1905,9 +1910,9 @@ incr_parse (JSON *self)
+                   }
+                 else if (*p == '\\')
+                   {
+-                    ++p; // "virtually" consumes character after \
++                    ++p; /* "virtually" consumes character after \ */
+ 
+-                    if (!*p) // if at end of string we have to switch modes
++                    if (!*p) /* if at end of string we have to switch modes */
+                       {
+                         self->incr_mode = INCR_M_BS;
+                         goto interrupt;
+@@ -1919,7 +1924,7 @@ incr_parse (JSON *self)
+                 ++p;
+               }
+ 
+-          // after initial ws, outside string
++          /* after initial ws, outside string */
+           case INCR_M_JSON:
+           incr_m_json:
+             for (;;)
+@@ -1936,7 +1941,7 @@ incr_parse (JSON *self)
+                     case 0x20:
+                       if (!self->incr_nest)
+                         {
+-                          --p; // do not eat the whitespace, let the next round do it
++                          --p; /* do not eat the whitespace, let the next round do it */
+                           goto interrupt;
+                         }
+                       break;
+@@ -1975,12 +1980,11 @@ incr_parse (JSON *self)
+ 
+ interrupt:
+   self->incr_pos = p - SvPVX (self->incr_text);
+-  //printf ("interrupt<%.*s>\n", self->incr_pos, SvPVX(self->incr_text));//D
+-  //printf ("return pos %d mode %d nest %d\n", self->incr_pos, self->incr_mode, self->incr_nest);//D
++  /* printf ("interrupt<%.*s>\n", self->incr_pos, SvPVX(self->incr_text));/* D */
++  /* printf ("return pos %d mode %d nest %d\n", self->incr_pos, self->incr_mode, self->incr_nest);/* D */
+ }
+ 
+-/////////////////////////////////////////////////////////////////////////////
+-// XS interface functions
++/* XS interface functions */
+ 
+ MODULE = JSON::XS		PACKAGE = JSON::XS
+ 
+@@ -2170,7 +2174,7 @@ void incr_parse (JSON *self, SV *jsonstr
+                                  - (U8 *)SvPVX (self->incr_text);
+             }
+ 
+-        // append data, if any
++        /* append data, if any */
+         if (jsonstr)
+           {
+             /* make sure both strings have same encoding */
+@@ -2191,7 +2195,7 @@ void incr_parse (JSON *self, SV *jsonstr
+ 
+               Move (str, SvEND (self->incr_text), len, char);
+               SvCUR_set (self->incr_text, SvCUR (self->incr_text) + len);
+-              *SvEND (self->incr_text) = 0; // this should basically be a nop, too, but make sure it's there
++              *SvEND (self->incr_text) = 0; /* this should basically be a nop, too, but make sure it's there */
+             }
+           }
+ 
+@@ -2211,7 +2215,7 @@ void incr_parse (JSON *self, SV *jsonstr
+ 
+                   if (!INCR_DONE (self))
+                     {
+-                      // as an optimisation, do not accumulate white space in the incr buffer
++                      /* as an optimisation, do not accumulate white space in the incr buffer */
+                       if (self->incr_mode == INCR_M_WS && self->incr_pos)
+                         {
+                           self->incr_pos = 0;
