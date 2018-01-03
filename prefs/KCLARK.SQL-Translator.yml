@@ -1,5 +1,0 @@
---- 
-match:
-  distribution: "(KCLARK|FREW|ILMARI)/SQL-Translator"
-patches:
-  - "../../patches/SQL-Translator.patch"
