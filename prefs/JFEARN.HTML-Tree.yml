@@ -4,6 +4,6 @@ comment: |
   correct indentation please
 
 match:
-  distribution: "JFEARN/HTML-Tree-\d"
+  distribution: "JFEARN/HTML-Tree-\\d"
 patches:
   - "../../patches/HTML-Tree.patch"

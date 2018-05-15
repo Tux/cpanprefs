@@ -1,5 +1,5 @@
 --- 
 match:
-  distribution: "\w+/Text-CSV-Track-0.8"
+  distribution: "\\w+/Text-CSV-Track-0.8"
 patches:
   - "../../patches/Text-CSV-Track.patch"

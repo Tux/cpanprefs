@@ -1,6 +1,6 @@
 --- 
 match:
-  distribution: "\w+/Net-SSLeay-\d"
+  distribution: "\\w+/Net-SSLeay-\\d"
 pl:
   expect:
     - "Do you want to run external tests?"

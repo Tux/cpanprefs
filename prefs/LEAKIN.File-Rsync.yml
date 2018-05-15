@@ -3,5 +3,5 @@ match:
   distribution: "LEAKIN/File-Rsync"
 pl:
   expect:
-    - "Path to rsync \[.*\]: "
+    - "Path to rsync \\[.*\\]:\\s*"
     - "\n"
