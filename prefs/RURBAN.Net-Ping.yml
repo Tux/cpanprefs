@@ -1,0 +1,6 @@
+--- 
+match:
+  distribution: "RURBAN/Net-Ping-"
+test:
+  env:
+    NET_PING_FAIL_IP: 10.20.30.40
