@@ -1,0 +1,6 @@
+---
+comment: "correctly extend the stack"
+match:
+  distribution: '^HANK/Text-Aspell-0.09'
+patches:
+  - "../../patches/Text-Aspell-0.09.patch"

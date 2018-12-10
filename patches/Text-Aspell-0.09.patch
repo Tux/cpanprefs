@@ -1,0 +1,12 @@
+diff -purd Text-Aspell-0.09-0/Aspell.xs Text-Aspell-0.09-1/Aspell.xs
+--- Text-Aspell-0.09-0/Aspell.xs	2018-12-10 09:01:15.109229501 +0100
++++ Text-Aspell-0.09-1/Aspell.xs	2018-12-10 09:01:41.889939584 +0100
+@@ -431,7 +431,7 @@ list_dictionaries(self)
+             dictname = (char *)safemalloc( len + 1 );
+             sprintf( dictname, "%s:%s:%s:%s:%s", entry->name, entry->code, entry->jargon, entry->size_str, entry->module->name );
+ 
+-            PUSHs(sv_2mortal(newSVpv( dictname ,0 )));
++            XPUSHs(sv_2mortal(newSVpv( dictname ,0 )));
+             safefree( dictname );
+         }
+ 
