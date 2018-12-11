@@ -1,0 +1,6 @@
+---
+comment: "YAML test expectation is wrong"
+match:
+  distribution: '^YAPPO/String-Diff-0.07'
+patches:
+  - "../../patches/String-Diff-0.07.patch"
