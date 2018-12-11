@@ -1,0 +1,6 @@
+---
+comment: "encoding not supported in pod"
+match:
+  distribution: '^MIROD/XML-DOM-XPath-0.14'
+patches:
+  - "../../patches/XML-DOM-XPath-0.14.patch"
