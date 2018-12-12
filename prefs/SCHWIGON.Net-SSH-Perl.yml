@@ -1,0 +1,7 @@
+--- 
+match:
+  distribution: "SCHWIGON/Net-SSH-Perl-"
+pl:
+  expect:
+    - "Which protocol(s) do you plan to use\\? \\[3\\]"
+    - "3\n"

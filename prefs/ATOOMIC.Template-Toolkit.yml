@@ -1,0 +1,9 @@
+--- 
+match:
+  distribution: "ATOOMIC/Template-Toolkit-"
+pl:
+  expect:
+    - "Do you want to build the XS Stash module\\? \\[y\\]"
+    - "y\n"
+    - "Do you want to use the XS Stash by default\\? \\[y\\]"
+    - "y\n"
