@@ -1,0 +1,6 @@
+---
+comment: "unescaped left brace in test"
+match:
+  distribution: '^EVO/Class-MakeMethods-1.01'
+patches:
+  - "../../patches/Class-MakeMethods-1.01.patch"
