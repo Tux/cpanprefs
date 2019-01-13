@@ -1,0 +1,6 @@
+---
+comment: improve readability
+match:
+  distribution: '^ISHIGAKI/JSON-PP-\d'
+patches:
+  - "../../patches/JSON-PP.patch"
