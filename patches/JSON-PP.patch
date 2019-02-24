@@ -1,6 +1,6 @@
 diff -purd a/lib/JSON/PP.pm b/lib/JSON/PP.pm
---- a/lib/JSON/PP.pm	2018-12-06 18:25:12.000000000 +0100
-+++ b/lib/JSON/PP.pm	2019-01-13 12:10:11.852787211 +0100
+--- a/lib/JSON/PP.pm	2018-12-06 18:29:06.000000000 +0100
++++ b/lib/JSON/PP.pm	2019-01-22 23:49:48.976752101 +0100
 @@ -423,7 +423,8 @@ sub allow_bigint {
          $self->_down_indent() if ($indent);
  
@@ -22,8 +22,8 @@ diff -purd a/lib/JSON/PP.pm b/lib/JSON/PP.pm
  
      sub _looks_like_number {
 diff -purd a/t/006_pc_pretty.t b/t/006_pc_pretty.t
---- a/t/006_pc_pretty.t	2018-12-03 14:50:57.000000000 +0100
-+++ b/t/006_pc_pretty.t	2019-01-13 12:11:18.910577513 +0100
+--- a/t/006_pc_pretty.t	2018-12-06 18:29:06.000000000 +0100
++++ b/t/006_pc_pretty.t	2019-01-22 23:49:48.976752101 +0100
 @@ -24,8 +24,8 @@ is($js,q|[
     "hoge",
     {
@@ -68,8 +68,8 @@ diff -purd a/t/006_pc_pretty.t b/t/006_pc_pretty.t
 +is($pc->encode($obj), qq|{\n   "foo" :"bar"\n   }\n|, "before");
  
 diff -purd a/t/115_tie_ixhash.t b/t/115_tie_ixhash.t
---- a/t/115_tie_ixhash.t	2016-08-27 15:56:58.000000000 +0200
-+++ b/t/115_tie_ixhash.t	2019-01-13 12:13:46.070506378 +0100
+--- a/t/115_tie_ixhash.t	2018-12-06 18:29:06.000000000 +0100
++++ b/t/115_tie_ixhash.t	2019-01-22 23:49:48.976752101 +0100
 @@ -39,7 +39,7 @@ SKIP: {
     "3" : "c",
     "4" : "d",

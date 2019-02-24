@@ -1,0 +1,54 @@
+diff -purd a/t/xe05_indent_length.t b/t/xe05_indent_length.t
+--- a/t/xe05_indent_length.t	2017-12-21 12:12:40.000000000 +0100
++++ b/t/xe05_indent_length.t	2019-02-24 10:30:18.154968535 +0100
+@@ -18,10 +18,10 @@ is($json->indent->encode([1,{foo => 'bar
+   1,
+   {
+     "foo":"bar"
+-  },
++    },
+   "1",
+   "/"
+-]
++  ]
+ |);
+ 
+ 
+@@ -29,10 +29,10 @@ is($json->escape_slash(1)->pretty->inden
+   1,
+   {
+     "foo" : "bar"
+-  },
++    },
+   "1",
+   "\\/"
+-]
++  ]
+ |);
+ 
+ 
+@@ -40,20 +40,20 @@ is($json->escape_slash(1)->pretty->inden
+    1,
+    {
+       "foo" : "bar"
+-   },
++      },
+    "1",
+    "\\/"
+-]
++   ]
+ |);
+ 
+ is($json->escape_slash(1)->pretty->indent_length(15)->encode([1,{foo => 'bar'}, "1", "/"]), qq|[
+                1,
+                {
+                               "foo" : "bar"
+-               },
++                              },
+                "1",
+                "\\/"
+-]
++               ]
+ |);
+ 
+ 
