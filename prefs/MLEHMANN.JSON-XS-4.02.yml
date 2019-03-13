@@ -1,0 +1,6 @@
+---
+comment: "use common sense"
+match:
+  distribution: '^MLEHMANN/JSON-XS-4.0[2.]'
+patches:
+  - "../../patches/JSON-XS-4.02.patch"
