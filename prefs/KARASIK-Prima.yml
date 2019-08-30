@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "KARASIK/Prima-1"
+patches:
+  - "../../patches/Prima-1.patch"
