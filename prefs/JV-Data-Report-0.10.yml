@@ -1,0 +1,6 @@
+---
+comment: "Prevent undef warnings"
+match:
+  distribution: '^JV/Data-Report-0.10'
+patches:
+  - "../../patches/Data-Report-0.10.patch"

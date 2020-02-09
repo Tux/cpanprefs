@@ -1,0 +1,24 @@
+diff -purd Data-Report-0.10-0/lib/Data/Report/Base.pm Data-Report-0.10-1/lib/Data/Report/Base.pm
+--- Data-Report-0.10-0/lib/Data/Report/Base.pm	2008-08-18 11:52:11.000000000 +0200
++++ Data-Report-0.10-1/lib/Data/Report/Base.pm	2020-02-09 13:59:50.827072436 +0100
+@@ -35,7 +35,7 @@ sub new {
+ 
+     my $type = delete($args->{type});
+     my $style = delete($args->{style}) || "default";
+-    my $self = bless { _base_type   => lc($type),
++    my $self = bless { _base_type   => lc($type//""),
+ 		       _base_fields => [],
+ 		       _base_fdata  => {},
+ 		       _base_style  => $style,
+diff -purd Data-Report-0.10-0/lib/Data/Report.pm Data-Report-0.10-1/lib/Data/Report.pm
+--- Data-Report-0.10-0/lib/Data/Report.pm	2008-08-18 11:52:11.000000000 +0200
++++ Data-Report-0.10-1/lib/Data/Report.pm	2020-02-09 13:59:06.277706029 +0100
+@@ -133,7 +133,7 @@ sub create {
+     }
+ 
+     # 'type' attribute is mandatory.
+-    my $type = ucfirst(lc($args->{type}));
++    my $type = ucfirst(lc($args->{type}//""));
+     #croak("Missing \"type\" attribute") unless $type;
+     $type = "Text" unless $type;
+ 
