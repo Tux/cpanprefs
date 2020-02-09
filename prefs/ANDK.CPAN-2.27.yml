@@ -1,0 +1,6 @@
+---
+comment: "YAML modules default for $LoadBlessed was changed to false"
+match:
+  distribution: '^ANDK/CPAN-2.27'
+patches:
+  - "../../patches/CPAN-2.27.patch"
