@@ -1,0 +1,46 @@
+diff -purd a/lib/Module/CPANTS/Kwalitee/Files.pm b/lib/Module/CPANTS/Kwalitee/Files.pm
+--- a/lib/Module/CPANTS/Kwalitee/Files.pm	2014-11-24 05:06:55.000000000 +0100
++++ b/lib/Module/CPANTS/Kwalitee/Files.pm	2018-08-22 09:46:18.443179949 +0200
+@@ -5,11 +5,32 @@ use File::Find::Object;
+ use File::Spec::Functions qw(catfile);
+ use File::stat;
+ 
+-our $VERSION = '0.96';
++our $VERSION = '0.96_01';
+ $VERSION = eval $VERSION; ## no critic
+ 
+ sub order { 15 }
+ 
++my $manifest_skip = qr{^\xFF{100}};
++my @msf = grep { lc eq "manifest.skip" } glob "[Mm]*.????";
++if (@msf and open my $msh, "<", $msf[0]) {
++    my @skip;
++    while (<$msh>) {
++	s/[\s\r\n]+\z//;
++	if (s{/$}{} || -d $_) {
++	    push @skip, $_, "$_/.*";
++	    }
++	elsif (-f (my $pf = s/\\//gr)) {
++	    push @skip, quotemeta $pf;
++	    }
++	else {
++	    push @skip, (s/\$$// ? $_ : "$_.*");
++	    }
++	}
++    close $msh;
++    $manifest_skip = join "|" => reverse sort @skip;
++    $manifest_skip = qr{^($manifest_skip)$};
++    }
++
+ ##################################################################
+ # Analyse
+ ##################################################################
+@@ -36,6 +57,8 @@ sub analyse {
+         (my $path = $name) =~ s!^\Q$distdir\E(?:/|$)!! or next;
+         next if $path eq '';
+ 
++	$path =~ $manifest_skip and next;
++
+         if (-d $name) {
+             $dirs{$path} ||= {};
+             if (-l $name) {
