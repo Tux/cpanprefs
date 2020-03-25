@@ -1,10 +1,20 @@
 --- CPAN-2.27-0/lib/CPAN.pm	2019-06-30 08:25:30.000000000 +0200
 +++ CPAN-2.27-1/lib/CPAN.pm	2020-01-30 13:45:43.813088756 +0100
-@@ -559,6 +559,7 @@ sub _yaml_loadfile {
+@@ -558,7 +558,9 @@ sub _yaml_loadfile {
+         # 5.6.2 could not do the local() with the reference
          # so we do it manually instead
          my $old_loadcode = ${"$yaml_module\::LoadCode"};
++        my $old_loadblessed = ${"$yaml_module\::LoadBlessed"};
          ${ "$yaml_module\::LoadCode" } = $CPAN::Config->{yaml_load_code} || 0;
-+        local ${ "$yaml_module\::LoadBlessed" } = 1;
++        ${ "$yaml_module\::LoadBlessed" } = 1;
  
          my ($code, @yaml);
          if ($code = UNIVERSAL::can($yaml_module, "LoadFile")) {
+@@ -582,6 +584,7 @@ sub _yaml_loadfile {
+             }
+         }
+         ${"$yaml_module\::LoadCode"} = $old_loadcode;
++        ${"$yaml_module\::LoadBlessed"} = $old_loadblessed;
+         return \@yaml;
+     } else {
+         # this shall not be done by the frontend
