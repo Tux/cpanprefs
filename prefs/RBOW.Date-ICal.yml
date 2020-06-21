@@ -1,0 +1,5 @@
+---
+match:
+  distribution: '/\QDate-ICal-2.678'
+patches:
+  - ../../patches/Date-ICal-2.678.patch
