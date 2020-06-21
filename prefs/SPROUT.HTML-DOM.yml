@@ -1,0 +1,5 @@
+---
+match:
+  distribution: '/\QHTML-DOM-0.058'
+patches:
+  - ../../patches/HTML-DOM-0.058.patch

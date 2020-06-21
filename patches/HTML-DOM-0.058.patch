@@ -1,0 +1,27 @@
+--- a/t/html-dom.t.orig	2018-10-21 12:42:03.151861348 -0400
++++ b/t/html-dom.t	2018-10-21 12:51:42.646258898 -0400
+@@ -64,20 +64,17 @@
+ $doc->close;
+ 
+ {
+-	no warnings 'deprecated';
+-	local $[ = 1;
+-	use warnings 'deprecated';
+ 	my @p_tags = $doc->body->childNodes;
+-	for(1..6){ 
+-		is $p_tags[$_]->tagName, 'P',
++	for(0..5){ 
++        is $p_tags[$_]->tagName, 'P',
+ 			"body\'s child node no. $_ is a P elem";
+ 		isa_ok $p_tags[$_]->firstChild, 'HTML::DOM::Text',
+ 			"first child of para $_";
+-		like $p_tags[$_]->firstChild->data, qr/Para $_\b/,
++        my $exp_para_number = $_ + 1;
++		like $p_tags[$_]->firstChild->data, qr/Para $exp_para_number\b/,
+ 			"contents of para $_";
+ 	}
+ }
+-
+ {
+  my $script = $doc->createElement('script');
+  $script->appendChild($doc->createTextNode('$doc->title("scred")'));
