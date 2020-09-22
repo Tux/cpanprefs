@@ -1,0 +1,5 @@
+---
+comment: "We need only one CPAN"
+match:
+    distribution: "^PERLANCAR/"
+disabled: 1
