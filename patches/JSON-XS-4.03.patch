@@ -1,0 +1,190 @@
+diff -purd a/Changes b/Changes
+--- a/Changes	2020-10-27 19:05:18.000000000 +0100
++++ b/Changes	2020-10-28 09:19:13.921456999 +0100
+@@ -64,7 +64,6 @@ TODO: replace bool_stash by BOOL_STASH s
+           (reported by Вадим Власов).
+         - work around a bug in older perls crashing when presented
+           with shared hash keys (Reini Urban).
+-        - use stability canary.
+ 
+ 3.01 Tue Oct 29 16:55:15 CET 2013
+ 	- backport to perls < 5.18 (reported by Paul Howarth).
+@@ -142,7 +141,6 @@ TODO: replace bool_stash by BOOL_STASH s
+           around the issue.
+ 	- ignore RMAGICAL hashes w.r.t. CANONICAL.
+ 	- try to work around a possible char signedness issue on aix.
+-        - require common sense.
+ 
+ 2.24  Sat May 30 08:25:45 CEST 2009
+ 	- the incremental parser did not update its parse offset
+diff -purd a/Makefile.PL b/Makefile.PL
+--- a/Makefile.PL	2016-04-25 21:04:54.000000000 +0200
++++ b/Makefile.PL	2020-10-28 09:19:13.921456999 +0100
+@@ -1,8 +1,6 @@
+ use 5.008003;
+ use ExtUtils::MakeMaker;
+ 
+-use Canary::Stability JSON::XS => 1, 5.008003;
+-
+ WriteMakefile(
+     dist	 => {
+ 	             PREOP	=> 'pod2text XS.pm | tee README >$(DISTVNAME)/README; chmod -R u=rwX,go=rX . ;',
+@@ -13,9 +11,18 @@ WriteMakefile(
+     VERSION_FROM => "XS.pm",
+     NAME         => "JSON::XS",
+     PREREQ_PM    => {
+-       common::sense     => 0,
+        Types::Serialiser => 0,
+     },
+-    CONFIGURE_REQUIRES => { ExtUtils::MakeMaker => 6.52, Canary::Stability => 0 },
++    CONFIGURE_REQUIRES => { ExtUtils::MakeMaker => 6.52 },
+ );
+ 
++1;
++
++package MY;
++
++sub postamble {
++    join "\n" =>
++	q{XS.xs: Makefile}, # must use $$ as make will reduce that to $
++	q{	perl -pi -e's,//+\s*(.*),/* $$1 */,' XS.xs},
++	q{};
++    } # postamble
+diff -purd a/META.json b/META.json
+--- a/META.json	2020-10-27 19:05:48.000000000 +0100
++++ b/META.json	2020-10-28 09:19:13.921456999 +0100
+@@ -27,14 +27,12 @@
+       },
+       "configure" : {
+          "requires" : {
+-            "Canary::Stability" : "0",
+             "ExtUtils::MakeMaker" : "6.52"
+          }
+       },
+       "runtime" : {
+          "requires" : {
+-            "Types::Serialiser" : "0",
+-            "common::sense" : "0"
++            "Types::Serialiser" : "0"
+          }
+       }
+    },
+diff -purd a/META.yml b/META.yml
+--- a/META.yml	2020-10-27 19:05:48.000000000 +0100
++++ b/META.yml	2020-10-28 09:20:29.330404924 +0100
+@@ -5,7 +5,6 @@ author:
+ build_requires:
+   ExtUtils::MakeMaker: '0'
+ configure_requires:
+-  Canary::Stability: '0'
+   ExtUtils::MakeMaker: '6.52'
+ dynamic_config: 1
+ generated_by: 'ExtUtils::MakeMaker version 7.34, CPAN::Meta::Converter version 2.150001'
+@@ -20,5 +19,4 @@ no_index:
+     - inc
+ requires:
+   Types::Serialiser: '0'
+-  common::sense: '0'
+ version: '4.03'
+diff -purd a/t/06_pc_pretty.t b/t/06_pc_pretty.t
+--- a/t/06_pc_pretty.t	2009-09-08 02:37:43.000000000 +0200
++++ b/t/06_pc_pretty.t	2020-10-28 09:19:13.921456999 +0100
+@@ -23,8 +23,8 @@ is($js,q|[
+    "hoge",
+    {
+       "foo" : "bar"
+-   }
+-]
++      }
++   ]
+ |);
+ 
+ $obj = { foo => [ {a=>"b"}, 0, 1, 2 ] };
+@@ -40,12 +40,12 @@ is($js,q|{
+    "foo" : [
+       {
+          "a" : "b"
+-      },
++         },
+       0,
+       1,
+       2
+-   ]
+-}
++      ]
++   }
+ |);
+ 
+ $obj = { foo => [ {a=>"b"}, 0, 1, 2 ] };
+@@ -56,11 +56,11 @@ is($js,q|{"foo":[{"a":"b"},0,1,2]}|);
+ 
+ $obj = {foo => "bar"};
+ $pc->indent(1);
+-is($pc->encode($obj), qq|{\n   "foo":"bar"\n}\n|, "nospace");
++is($pc->encode($obj), qq|{\n   "foo":"bar"\n   }\n|, "nospace");
+ $pc->space_after(1);
+-is($pc->encode($obj), qq|{\n   "foo": "bar"\n}\n|, "after");
++is($pc->encode($obj), qq|{\n   "foo": "bar"\n   }\n|, "after");
+ $pc->space_before(1);
+-is($pc->encode($obj), qq|{\n   "foo" : "bar"\n}\n|, "both");
++is($pc->encode($obj), qq|{\n   "foo" : "bar"\n   }\n|, "both");
+ $pc->space_after(0);
+-is($pc->encode($obj), qq|{\n   "foo" :"bar"\n}\n|, "before");
++is($pc->encode($obj), qq|{\n   "foo" :"bar"\n   }\n|, "before");
+ 
+diff -purd a/t/11_pc_expo.t b/t/11_pc_expo.t
+--- a/t/11_pc_expo.t	2011-08-17 14:10:34.000000000 +0200
++++ b/t/11_pc_expo.t	2020-10-28 09:19:13.921456999 +0100
+@@ -28,9 +28,9 @@ $js = $pc->encode($obj);
+ is($js,'[0.000123]', 'digit 1.23E-4');
+ 
+ 
+-$js  = q|[1.01e+30]|;
++$js  = q|[1.01e+60]|;
+ $obj = $pc->decode($js);
+-is($obj->[0], 1.01e+30, 'digit 1.01e+30');
++is($obj->[0], 1.01e+60, 'digit 1.01e+60');
+ $js = $pc->encode($obj);
+-like($js,qr/\[1.01[Ee]\+0?30\]/, 'digit 1.01e+30');
++like($js,qr/\[1.01[Ee]\+0?60\]/, 'digit 1.01e+60');
+ 
+diff -purd a/XS.pm b/XS.pm
+--- a/XS.pm	2020-10-27 19:05:46.000000000 +0100
++++ b/XS.pm	2020-10-28 09:19:13.921456999 +0100
+@@ -87,7 +87,8 @@ stuff). Or you can combine those feature
+ 
+ package JSON::XS;
+ 
+-use common::sense;
++use strict;
++use warnings;
+ 
+ our $VERSION = '4.03';
+ our @ISA = qw(Exporter);
+diff -purd a/XS.xs b/XS.xs
+--- a/XS.xs	2020-10-27 19:03:21.000000000 +0100
++++ b/XS.xs	2020-10-28 09:19:13.921456999 +0100
+@@ -597,6 +597,11 @@ encode_av (enc_t *enc, AV *av)
+       encode_nl (enc); --enc->indent; encode_indent (enc);
+     }
+ 
++  if (enc->json.flags & F_INDENT) { /* pretty, so indent! */
++      encode_ch (enc, ' ');
++      encode_ch (enc, ' ');
++      encode_ch (enc, ' ');
++      }
+   encode_ch (enc, ']');
+ }
+ 
+@@ -765,6 +770,11 @@ encode_hv (enc_t *enc, HV *hv)
+           }
+     }
+ 
++  if (enc->json.flags & F_INDENT) { /* pretty, so indent! */
++      encode_ch (enc, ' ');
++      encode_ch (enc, ' ');
++      encode_ch (enc, ' ');
++      }
+   encode_ch (enc, '}');
+ }
+ 
