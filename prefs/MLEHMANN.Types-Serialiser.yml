@@ -1,6 +1,0 @@
----
-comment: use common sense
-match:
-  distribution: '^MLEHMANN/Types-Serialiser'
-patches:
-  - "../../patches/Types-Serialiser.patch"

@@ -1,0 +1,62 @@
+diff -purd a/Changes b/Changes
+--- a/Changes	2020-12-01 02:46:49.000000000 +0100
++++ b/Changes	2020-12-01 11:10:53.174767864 +0100
+@@ -23,7 +23,6 @@ Revision history for Perl extension Type
+           JSON::PP to stay in core without dependency to
+           Types::Serialiser.
+         - actually add a simple testcase.
+-        - reintroduced common::sense to supprerss spurious warnings.
+ 
+ 0.01 Sun Oct 27 16:37:56 CET 2013
+ 	- original version; cloned from JSON-XS/CBOR-XS
+diff -purd a/Makefile.PL b/Makefile.PL
+--- a/Makefile.PL	2013-10-28 22:29:27.000000000 +0100
++++ b/Makefile.PL	2020-12-01 11:11:03.942902284 +0100
+@@ -8,8 +8,5 @@ WriteMakefile(
+ 	            },
+     VERSION_FROM => "Serialiser.pm",
+     NAME         => "Types::Serialiser",
+-    PREREQ_PM    => {
+-       common::sense     => 0,
+-    },
+ );
+ 
+diff -purd a/META.json b/META.json
+--- a/META.json	2020-12-01 02:47:04.000000000 +0100
++++ b/META.json	2020-12-01 11:11:23.555147104 +0100
+@@ -29,11 +29,6 @@
+          "requires" : {
+             "ExtUtils::MakeMaker" : "0"
+          }
+-      },
+-      "runtime" : {
+-         "requires" : {
+-            "common::sense" : "0"
+-         }
+       }
+    },
+    "release_status" : "stable",
+diff -purd a/META.yml b/META.yml
+--- a/META.yml	2020-12-01 02:47:04.000000000 +0100
++++ b/META.yml	2020-12-01 11:11:37.715323866 +0100
+@@ -17,6 +17,4 @@ no_index:
+   directory:
+     - t
+     - inc
+-requires:
+-  common::sense: '0'
+ version: '1.01'
+diff -purd a/Serialiser.pm b/Serialiser.pm
+--- a/Serialiser.pm	2020-12-01 02:46:53.000000000 +0100
++++ b/Serialiser.pm	2020-12-01 11:12:06.579684181 +0100
+@@ -17,7 +17,9 @@ different implementations so they become
+ 
+ package Types::Serialiser;
+ 
+-use common::sense; # required to suppress annoying warnings
++use strict;
++use warnings;
++no  warnings "bareword";
+ 
+ our $VERSION = '1.01';
+ 
