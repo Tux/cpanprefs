@@ -1,11 +1,12 @@
 diff -purd a/t/Object/Fonts.t b/t/Object/Fonts.t
 --- a/t/Object/Fonts.t	2021-03-29 19:48:11.000000000 +0200
 +++ b/t/Object/Fonts.t	2021-05-05 08:59:54.820190401 +0200
-@@ -82,6 +82,7 @@ sub t
+@@ -82,6 +82,8 @@ sub t
  my $filter = @ARGV ? qr/$ARGV[0]/ : qr/./;
  my $bad_guys = qr/(
  	Color\sEmoji       # fontconfig doesn't support this .ttc, reports crazy numbers and cannot display it
 +|	Emmentaler-Brace
++|	Tt-Kp
  )/x;
  
  $x = Prima::DeviceBitmap-> create( type => dbt::Bitmap, width => 8, height => 8);
