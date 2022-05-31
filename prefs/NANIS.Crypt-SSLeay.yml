@@ -3,6 +3,8 @@ match:
   distribution: "^(DLAND|NANIS)/Crypt-SSLeay-"
   perlconfig:
     osname: "linux"
+patches:
+  - "../../patches/Crypt-SSLeay-0.72.patch"
 pl:
   eexpect:
     mode: anyorder
