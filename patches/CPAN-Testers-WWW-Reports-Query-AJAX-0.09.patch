@@ -1,0 +1,12 @@
+diff -purd a/lib/CPAN/Testers/WWW/Reports/Query/AJAX.pm b/lib/CPAN/Testers/WWW/Reports/Query/AJAX.pm
+--- a/lib/CPAN/Testers/WWW/Reports/Query/AJAX.pm	2014-09-20 19:31:31.000000000 +0200
++++ b/lib/CPAN/Testers/WWW/Reports/Query/AJAX.pm	2023-05-09 08:52:52.642228106 +0200
+@@ -152,7 +152,7 @@ sub pc_unknown  { $_[0]->_basic_pc('unkn
+ sub _basic {
+     my $self    = shift;
+     my $grade   = shift;
+-    my $version = $self->{options}{version} || $self->{recent};
++    my $version = $self->{options}{version} || $self->{recent} // "";
+     return $self->{result}{$version}{$grade};
+ }
+ 

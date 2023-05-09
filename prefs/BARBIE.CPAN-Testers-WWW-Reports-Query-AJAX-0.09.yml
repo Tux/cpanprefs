@@ -1,0 +1,6 @@
+---
+comment: "$version can be undefined causing spourious warnings"
+match:
+  distribution: '^BARBIE/CPAN-Testers-WWW-Reports-Query-AJAX-0.09'
+patches:
+  - "../../patches/CPAN-Testers-WWW-Reports-Query-AJAX-0.09.patch"
