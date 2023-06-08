@@ -1,13 +1,14 @@
 diff -purd a/bin/json_pp b/bin/json_pp
 --- a/bin/json_pp	2022-06-24 06:27:44.000000000 +0200
 +++ b/bin/json_pp	2023-06-08 08:55:08.335315417 +0200
-@@ -101,8 +101,7 @@ $T{$opt_to}
+@@ -101,8 +101,8 @@ $T{$opt_to}
  $_ = $F{$opt_from}->();
  $_ = $T{$opt_to}->();
  
 -print $_;
 -
-+print s/[{[]\K\n\s+(?=(?:\w+|"[^"]*") :)/  /grs;
++print s/[{[]\K\n\s+(?=(?:\w+|"[^"]*") :)/  /grs
++   =~ s/\n\s*[{[]\K\n\s+(?=[{[])/  /grs;
  
  __END__
  
