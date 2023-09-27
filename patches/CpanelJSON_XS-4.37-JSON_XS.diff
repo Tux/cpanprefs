@@ -1,8 +1,463 @@
-Only in a/bin: cpanel_json_xs
-Only in b/bin: json_xs
-diff -purd a/Changes b/Changes
+diff -purdN a/bin/cpanel_json_xs b/bin/cpanel_json_xs
+--- a/bin/cpanel_json_xs	2020-10-27 18:39:09.000000000 +0100
++++ b/bin/cpanel_json_xs	2023-09-27 10:24:32.938342615 +0200
+@@ -2,15 +2,15 @@
+ 
+ =head1 NAME
+ 
+-cpanel_json_xs - Cpanel::JSON::XS commandline utility
++json_xs - JSON::XS commandline utility
+ 
+ =head1 SYNOPSIS
+ 
+-   cpanel_json_xs [-v] [-f inputformat] [-t outputformat]
++   json_xs [-v] [-f inputformat] [-t outputformat]
+ 
+ =head1 DESCRIPTION
+ 
+-F<cpanel_json_xs> converts between some input and output formats (one of them is
++F<json_xs> converts between some input and output formats (one of them is
+ JSON).
+ 
+ The default input format is C<json> and the default output format is
+@@ -132,40 +132,40 @@ written is in C<$_>, and whatever is in
+ 
+ =head1 EXAMPLES
+ 
+-   cpanel_json_xs -t none <isitreally.json
++   json_xs -t none <isitreally.json
+ 
+ "JSON Lint" - tries to parse the file F<isitreally.json> as JSON - if it
+ is valid JSON, the command outputs nothing, otherwise it will print an
+ error message and exit with non-zero exit status.
+ 
+-   <src.json cpanel_json_xs >pretty.json
++   <src.json json_xs >pretty.json
+ 
+ Prettify the JSON file F<src.json> to F<dst.json>.
+ 
+-   cpanel_json_xs -f storable-file <file
++   json_xs -f storable-file <file
+ 
+ Read the serialized Storable file F<file> and print a human-readable JSON
+ version of it to STDOUT.
+ 
+-   cpanel_json_xs -f storable-file -t yaml <file
++   json_xs -f storable-file -t yaml <file
+ 
+ Same as above, but write YAML instead (not using JSON at all :)
+ 
+-   cpanel_json_xs -f none -e '$_ = [1, 2, 3]'
++   json_xs -f none -e '$_ = [1, 2, 3]'
+ 
+ Dump the perl array as UTF-8 encoded JSON text.
+ 
+-   <torrentfile cpanel_json_xs -f bencode -e '$_ = join "\n", map @$_, @{$_->{"announce-list"}}' -t string
++   <torrentfile json_xs -f bencode -e '$_ = join "\n", map @$_, @{$_->{"announce-list"}}' -t string
+ 
+ Print the tracker list inside a torrent file.
+ 
+-   lwp-request http://cpantesters.perl.org/show/Cpanel-JSON-XS.json | cpanel_json_xs
++   lwp-request http://cpantesters.perl.org/show/Cpanel-JSON-XS.json | json_xs
+ 
+-Fetch the cpan-testers result summary C<Cpanel::JSON::XS> and pretty-print it.
++Fetch the cpan-testers result summary C<JSON::XS> and pretty-print it.
+ 
+-    cpanel_json_xs -f yaml-xs -t yaml-tiny <META.yml   >MYMETA.yml
+-    cpanel_json_xs -f yaml-tiny -t yaml-xs <MYMETA.yml >XSMETA.yml
+-    cpanel_json_xs -f yaml -t yaml <XSMETA.yml #BOOM!
++    json_xs -f yaml-xs -t yaml-tiny <META.yml   >MYMETA.yml
++    json_xs -f yaml-tiny -t yaml-xs <MYMETA.yml >XSMETA.yml
++    json_xs -f yaml -t yaml <XSMETA.yml #BOOM!
+     Error: YAML_LOAD_ERR_BAD_MAP_ELEMENT
+ 
+ Compare YAML en- and decoders, and see that YAML::XS generates unparsable YAML
+@@ -184,7 +184,7 @@ use Getopt::Long;
+ use Storable ();
+ use Encode;
+ 
+-use Cpanel::JSON::XS;
++use JSON::XS;
+ 
+ my $opt_verbose;
+ my $opt_from = "json";
+@@ -216,16 +216,16 @@ my %F = (
+    "none"          => sub { undef },
+    "string"        => sub { $_ },
+    "json"          => sub {
+-      Cpanel::JSON::XS->new->decode (decode enc($_), $_)
++      JSON::XS->new->decode (decode enc($_), $_)
+    },
+    "json-nonref"   => sub {
+-      Cpanel::JSON::XS->new->allow_nonref->decode (decode enc($_), $_)
++      JSON::XS->new->allow_nonref->decode (decode enc($_), $_)
+    },
+    "json-relaxed"   => sub {
+-      Cpanel::JSON::XS->new->relaxed->decode (decode enc($_), $_)
++      JSON::XS->new->relaxed->decode (decode enc($_), $_)
+    },
+    "json-unknown"   => sub {
+-      Cpanel::JSON::XS->new->allow_unknown->decode (decode enc($_), $_)
++      JSON::XS->new->allow_unknown->decode (decode enc($_), $_)
+    },
+    "storable"      => sub { Storable::thaw $_ },
+    "storable-file" => sub { open my $fh, "<", \$_; Storable::fd_retrieve $fh },
+@@ -253,16 +253,16 @@ my %T = (
+    "string"        => sub { $_ },
+    "json"          => sub { encode_json $_ },
+    "json-utf-8"    => sub { encode_json $_ },
+-   "json-pretty"   => sub { Cpanel::JSON::XS->new->utf8->pretty->canonical->encode ($_) },
+-   "json-stringify"=> sub { Cpanel::JSON::XS->new->utf8->pretty->canonical->allow_stringify->encode ($_) },
+-   "json-relaxed"  => sub { Cpanel::JSON::XS->new->utf8->pretty->canonical
++   "json-pretty"   => sub { JSON::XS->new->utf8->pretty->canonical->encode ($_) },
++   "json-stringify"=> sub { JSON::XS->new->utf8->pretty->canonical->allow_stringify->encode ($_) },
++   "json-relaxed"  => sub { JSON::XS->new->utf8->pretty->canonical
+                               ->allow_stringify->allow_blessed->convert_blessed
+                               ->allow_unknown->allow_tags->stringify_infnan(1)
+                               ->encode ($_) },
+-   "json-utf-16le" => sub { encode "utf-16le", Cpanel::JSON::XS->new->encode ($_) },
+-   "json-utf-16be" => sub { encode "utf-16be", Cpanel::JSON::XS->new->encode ($_) },
+-   "json-utf-32le" => sub { encode "utf-32le", Cpanel::JSON::XS->new->encode ($_) },
+-   "json-utf-32be" => sub { encode "utf-32be", Cpanel::JSON::XS->new->encode ($_) },
++   "json-utf-16le" => sub { encode "utf-16le", JSON::XS->new->encode ($_) },
++   "json-utf-16be" => sub { encode "utf-16be", JSON::XS->new->encode ($_) },
++   "json-utf-32le" => sub { encode "utf-32le", JSON::XS->new->encode ($_) },
++   "json-utf-32be" => sub { encode "utf-32be", JSON::XS->new->encode ($_) },
+ 
+    "storable"      => sub { Storable::nfreeze $_ },
+    "storable-file" => sub { open my $fh, ">", \my $buf; Storable::nstore_fd $_, $fh; $buf },
+diff -purdN a/bin/json_xs b/bin/json_xs
+--- a/bin/json_xs	1970-01-01 01:00:00.000000000 +0100
++++ b/bin/json_xs	2023-09-27 10:24:32.938342615 +0200
+@@ -0,0 +1,325 @@
++#!/usr/bin/perl
++
++=head1 NAME
++
++json_xs - JSON::XS commandline utility
++
++=head1 SYNOPSIS
++
++   json_xs [-v] [-f inputformat] [-t outputformat]
++
++=head1 DESCRIPTION
++
++F<json_xs> converts between some input and output formats (one of them is
++JSON).
++
++The default input format is C<json> and the default output format is
++C<json-pretty>.
++
++=head1 OPTIONS
++
++=over 4
++
++=item -v
++
++Be slightly more verbose.
++
++=item -f fromformat
++
++Read a file in the given format from STDIN.
++
++C<fromformat> can be one of:
++
++=over 4
++
++=item json - a json text encoded, either utf-8, utf16-be/le, utf32-be/le
++
++=item json-nonref - json according to RFC 7159
++
++=item json-relaxed - json with all relaxed options
++
++=item json-unknown - json with allow_unknown
++
++=item storable - a Storable frozen value
++
++=item storable-file - a Storable file (Storable has two incompatible formats)
++
++=item bencode - uses one of Net::BitTorrent::Protocol::BEP03::Bencode, Bencode or the broken Convert::Bencode, if available (used by torrent files, among others)
++
++=item clzf - Compress::LZF format (requires that module to be installed)
++
++=item eval - evaluate the given code as (non-utf-8) Perl, basically the reverse of "-t dump"
++
++=item yaml - loose YAML (requires YAML)
++
++=item yaml-tiny - loose YAML (requires YAML::Tiny or CPAN::Meta::YAML)
++
++=item yaml-xs - strict YAML 1.2 (requires YAML::XS)
++
++=item yaml-syck - YAML (requires YAML::Syck)
++
++=item cbor - CBOR (via CBOR::XS)
++
++=item string - do not attempt to decode the file data
++
++=item sereal - Sereal (via Sereal::Decoder)
++
++=item none - nothing is read, creates an C<undef> scalar - mainly useful with C<-e>
++
++=back
++
++=item -t toformat
++
++Write the file in the given format to STDOUT.
++
++C<toformat> can be one of:
++
++=over 4
++
++=item json, json-utf-8 - json, utf-8 encoded
++
++=item json-pretty - as above, but pretty-printed with sorted object keys
++
++=item json-stringify - as json-pretty with allow_stringify
++
++=item json-relaxed  - as json-pretty, but with the additional options
++
++->allow_stringify->allow_blessed->convert_blessed->allow_unknown
++->allow_tags->stringify_infnan(1)
++
++=item json-utf-16le, json-utf-16be - little endian/big endian utf-16
++
++=item json-utf-32le, json-utf-32be - little endian/big endian utf-32
++
++=item storable - a Storable frozen value in network format
++
++=item storable-file - a Storable file in network format (Storable has two incompatible formats)
++
++=item bencode - uses one of Net::BitTorrent::Protocol::BEP03::Bencode, Bencode or the broken Convert::Bencode, if available (used by torrent files, among others)
++
++=item clzf - Compress::LZF format
++
++=item yaml - loose YAML (requires YAML)
++
++=item yaml-tiny - loose YAML (requires YAML::Tiny or CPAN::Meta::YAML)
++
++=item yaml-xs - strict YAML 1.2 (requires YAML::XS)
++
++=item yaml-syck - YAML (requires YAML::Syck)
++
++=item dump - Data::Dump
++
++=item dumper - Data::Dumper
++
++=item string - writes the data out as if it were a string
++
++=item sereal - Sereal (via Sereal::Encoder)
++
++=item none - nothing gets written, mainly useful together with C<-e>
++
++Note that Data::Dumper doesn't handle self-referential data structures
++correctly - use "dump" instead.
++
++=back
++
++=item -e code
++
++Evaluate perl code after reading the data and before writing it out again
++- can be used to filter, create or extract data. The data that has been
++written is in C<$_>, and whatever is in there is written out afterwards.
++
++=back
++
++=head1 EXAMPLES
++
++   json_xs -t none <isitreally.json
++
++"JSON Lint" - tries to parse the file F<isitreally.json> as JSON - if it
++is valid JSON, the command outputs nothing, otherwise it will print an
++error message and exit with non-zero exit status.
++
++   <src.json json_xs >pretty.json
++
++Prettify the JSON file F<src.json> to F<dst.json>.
++
++   json_xs -f storable-file <file
++
++Read the serialized Storable file F<file> and print a human-readable JSON
++version of it to STDOUT.
++
++   json_xs -f storable-file -t yaml <file
++
++Same as above, but write YAML instead (not using JSON at all :)
++
++   json_xs -f none -e '$_ = [1, 2, 3]'
++
++Dump the perl array as UTF-8 encoded JSON text.
++
++   <torrentfile json_xs -f bencode -e '$_ = join "\n", map @$_, @{$_->{"announce-list"}}' -t string
++
++Print the tracker list inside a torrent file.
++
++   lwp-request http://cpantesters.perl.org/show/Cpanel-JSON-XS.json | json_xs
++
++Fetch the cpan-testers result summary C<JSON::XS> and pretty-print it.
++
++    json_xs -f yaml-xs -t yaml-tiny <META.yml   >MYMETA.yml
++    json_xs -f yaml-tiny -t yaml-xs <MYMETA.yml >XSMETA.yml
++    json_xs -f yaml -t yaml <XSMETA.yml #BOOM!
++    Error: YAML_LOAD_ERR_BAD_MAP_ELEMENT
++
++Compare YAML en- and decoders, and see that YAML::XS generates unparsable YAML
++L<https://github.com/ingydotnet/yaml-libyaml-pm/issues/9>
++
++=head1 AUTHOR
++
++Copyright (C) 2008 Marc Lehmann <json@schmorp.de>
++Copyright (C) 2016 Cpanel Inc
++
++=cut
++
++use strict;
++
++use Getopt::Long;
++use Storable ();
++use Encode;
++
++use JSON::XS;
++
++my $opt_verbose;
++my $opt_from = "json";
++my $opt_to   = "json-pretty";
++my $opt_eval;
++
++Getopt::Long::Configure ("bundling", "no_ignore_case", "require_order");
++
++GetOptions(
++   "v"   => \$opt_verbose,
++   "f=s" => \$opt_from,
++   "t=s" => \$opt_to,
++   "e=s" => \$opt_eval,
++) or die "Usage: $0 [-v] -f fromformat [-e code] [-t toformat]\n";
++
++sub enc {
++  $_ = shift;
++  my $enc =
++    /^\x00\x00\x00/s    ? "utf-32be"
++    : /^\x00.\x00/s     ? "utf-16be"
++    : /^.\x00\x00\x00/s ? "utf-32le"
++    : /^.\x00.\x00/s    ? "utf-16le"
++    :                     "utf-8";
++  warn "input text encoding is $enc\n" if $opt_verbose;
++  $enc;
++}
++
++my %F = (
++   "none"          => sub { undef },
++   "string"        => sub { $_ },
++   "json"          => sub {
++      JSON::XS->new->decode (decode enc($_), $_)
++   },
++   "json-nonref"   => sub {
++      JSON::XS->new->allow_nonref->decode (decode enc($_), $_)
++   },
++   "json-relaxed"   => sub {
++      JSON::XS->new->relaxed->decode (decode enc($_), $_)
++   },
++   "json-unknown"   => sub {
++      JSON::XS->new->allow_unknown->decode (decode enc($_), $_)
++   },
++   "storable"      => sub { Storable::thaw $_ },
++   "storable-file" => sub { open my $fh, "<", \$_; Storable::fd_retrieve $fh },
++   "bencode"       => sub {
++      if (eval {require Net::BitTorrent::Protocol::BEP03::Bencode }) {
++        return Net::BitTorrent::Protocol::BEP03::Bencode::bdecode ($_);
++      }
++      if (eval {require Bencode}) {
++        return Bencode::bdecode ($_);
++      }
++      require Convert::Bencode; return Convert::Bencode::bdecode ($_);
++   },
++   "clzf"          => sub { require Compress::LZF; Compress::LZF::sthaw ($_) },
++   "yaml"          => sub { require YAML; YAML::Load ($_) },
++   "yaml-tiny"     => sub { require CPAN::Meta::YAML; CPAN::Meta::YAML::Load ($_) },
++   "yaml-xs"       => sub { require YAML::XS; YAML::XS::Load ($_) },
++   "yaml-syck"     => sub { require YAML::Syck; YAML::Syck::Load ($_) },
++   "cbor"          => sub { require CBOR::XS; CBOR::XS::decode_cbor ($_) },
++   "sereal"        => sub { require Sereal::Decoder; Sereal::Decoder::decode_sereal ($_) },
++   "eval"          => sub { my $v = eval "no strict; no warnings; no utf8;\n#line 1 \"input\"\n$_"; die "$@" if $@; $v },
++);
++
++my %T = (
++   "none"          => sub { "" },
++   "string"        => sub { $_ },
++   "json"          => sub { encode_json $_ },
++   "json-utf-8"    => sub { encode_json $_ },
++   "json-pretty"   => sub { JSON::XS->new->utf8->pretty->canonical->encode ($_) },
++   "json-stringify"=> sub { JSON::XS->new->utf8->pretty->canonical->allow_stringify->encode ($_) },
++   "json-relaxed"  => sub { JSON::XS->new->utf8->pretty->canonical
++                              ->allow_stringify->allow_blessed->convert_blessed
++                              ->allow_unknown->allow_tags->stringify_infnan(1)
++                              ->encode ($_) },
++   "json-utf-16le" => sub { encode "utf-16le", JSON::XS->new->encode ($_) },
++   "json-utf-16be" => sub { encode "utf-16be", JSON::XS->new->encode ($_) },
++   "json-utf-32le" => sub { encode "utf-32le", JSON::XS->new->encode ($_) },
++   "json-utf-32be" => sub { encode "utf-32be", JSON::XS->new->encode ($_) },
++
++   "storable"      => sub { Storable::nfreeze $_ },
++   "storable-file" => sub { open my $fh, ">", \my $buf; Storable::nstore_fd $_, $fh; $buf },
++
++   "bencode"       => sub {
++      if (eval {require Net::BitTorrent::Protocol::BEP03::Bencode }) {
++        return Net::BitTorrent::Protocol::BEP03::Bencode::bencode ($_);
++      }
++      if (eval {require Bencode}) {
++        return Bencode::bencode ($_);
++      }
++      require Convert::Bencode; return Convert::Bencode::bencode ($_);
++   },
++   "clzf"          => sub { require Compress::LZF; Compress::LZF::sfreeze_cr ($_) },
++   "yaml"          => sub { require YAML; YAML::Dump ($_) },
++   "yaml-tiny"     => sub { require CPAN::Meta::YAML; CPAN::Meta::YAML::Dump ($_) },
++   "yaml-xs"       => sub { require YAML::XS; YAML::XS::Dump ($_) },
++   "yaml-syck"     => sub { require YAML::Syck; YAML::Syck::Dump ($_) },
++   "dumper"        => sub {
++      require Data::Dumper;
++      #local $Data::Dumper::Purity    = 1; # hopeless case
++      local $Data::Dumper::Terse     = 1;
++      local $Data::Dumper::Indent    = 1;
++      local $Data::Dumper::Useqq     = 1;
++      local $Data::Dumper::Quotekeys = 0;
++      local $Data::Dumper::Sortkeys  = 1;
++      Data::Dumper::Dumper($_)
++   },
++   "dump"          => sub {
++      require Data::Dump;
++      local $Data::Dump::TRY_BASE64 = 0;
++      Data::Dump::dump ($_) . "\n"
++   },
++   "sereal"        => sub { require Sereal::Encoder; Sereal::Encoder::encode_sereal ($_) },
++);
++
++$F{$opt_from}
++   or die "$opt_from: not a valid fromformat\n";
++
++$T{$opt_to}
++   or die "$opt_from: not a valid toformat\n";
++
++if ($opt_from ne "none") {
++   local $/;
++   binmode STDIN; # stupid perl sometimes thinks its funny
++   $_ = <STDIN>;
++}
++
++$_ = $F{$opt_from}->();
++
++eval $opt_eval;
++die $@ if $@;
++
++$_ = $T{$opt_to}->();
++
++binmode STDOUT;
++syswrite STDOUT, $_;
++
++
++
+diff -purdN a/Changes b/Changes
 --- a/Changes	2023-07-04 12:31:38.000000000 +0200
-+++ b/Changes	2023-09-26 18:58:57.045107151 +0200
++++ b/Changes	2023-09-27 10:22:04.530719048 +0200
 @@ -1,4 +1,4 @@
 -Revision history for Perl extension Cpanel::JSON::XS
 +Revision history for Perl extension JSON::XS
@@ -45,10 +500,9 @@ diff -purd a/Changes b/Changes
         - const'ed a translation table for memory savings (bulk88)
         - Fixed booleans for JSON 2.9 and JSON-XS-3.01 interop.
           JSON does not support JSON::XS booleans anymore, so
-Only in b: Changes.orig
-diff -purd a/eg/bench b/eg/bench
+diff -purdN a/eg/bench b/eg/bench
 --- a/eg/bench	2015-01-31 20:57:23.000000000 +0100
-+++ b/eg/bench	2023-09-26 18:58:57.045107151 +0200
++++ b/eg/bench	2023-09-27 10:22:04.530719048 +0200
 @@ -10,9 +10,9 @@ my %tst = (
     "JSON::DWIW/DS" => ['$dwiw->to_json ($perl)'   , 'JSON::DWIW::deserialize $json'],
  #   "JSON::PC"      => ['$pc->convert ($perl)'     , '$pc->parse ($json)'],
@@ -105,9 +559,9 @@ diff -purd a/eg/bench b/eg/bench
  
     my $count = 5;
     my $times = 200;
-diff -purd a/Makefile.PL b/Makefile.PL
+diff -purdN a/Makefile.PL b/Makefile.PL
 --- a/Makefile.PL	2021-10-14 21:15:41.000000000 +0200
-+++ b/Makefile.PL	2023-09-26 18:58:57.045107151 +0200
++++ b/Makefile.PL	2023-09-27 10:22:04.530719048 +0200
 @@ -49,9 +49,9 @@ WriteMakefile(
      COMPRESS	=> 'gzip -9v',
      SUFFIX	=> '.gz',
@@ -120,9 +574,9 @@ diff -purd a/Makefile.PL b/Makefile.PL
    CONFIGURE_REQUIRES => {
      'Config'              => 0,
      'ExtUtils::MakeMaker' => 0,
-diff -purd a/MANIFEST b/MANIFEST
+diff -purdN a/MANIFEST b/MANIFEST
 --- a/MANIFEST	2023-07-04 12:35:22.000000000 +0200
-+++ b/MANIFEST	2023-09-26 18:58:57.045107151 +0200
++++ b/MANIFEST	2023-09-27 10:22:04.530719048 +0200
 @@ -12,7 +12,7 @@ XS.pm
  XS.xs
  XS/Boolean.pm
@@ -132,9 +586,9 @@ diff -purd a/MANIFEST b/MANIFEST
  eg/bench
  ppport.h
  t/00_load.t
-diff -purd a/README b/README
+diff -purdN a/README b/README
 --- a/README	2023-07-04 12:35:22.000000000 +0200
-+++ b/README	2023-09-26 18:59:07.652080958 +0200
++++ b/README	2023-09-27 10:22:04.530719048 +0200
 @@ -1,8 +1,8 @@
  NAME
 -    Cpanel::JSON::XS - cPanel fork of JSON::XS, fast and correct serializing
@@ -878,11 +1332,9 @@ diff -purd a/README b/README
  
      JSON, JSON::XS, JSON::MaybeXS, Mojo::JSON, Mojo::JSON::MaybeXS,
      JSON::SL, JSON::DWIW, JSON::YAJL, JSON::Any, Test::JSON,
-Only in b: README.orig
-Only in b: README.rej
-diff -purd a/t/00_load.t b/t/00_load.t
+diff -purdN a/t/00_load.t b/t/00_load.t
 --- a/t/00_load.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/00_load.t	2023-09-26 18:58:57.045107151 +0200
++++ b/t/00_load.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,5 +1,5 @@
  BEGIN { $| = 1; print "1..1\n"; }
  END {print "not ok 1\n" unless $loaded;}
@@ -890,9 +1342,9 @@ diff -purd a/t/00_load.t b/t/00_load.t
 +use JSON::XS;
  $loaded = 1;
  print "ok 1\n";
-diff -purd a/t/01_utf8.t b/t/01_utf8.t
+diff -purdN a/t/01_utf8.t b/t/01_utf8.t
 --- a/t/01_utf8.t	2020-10-27 18:39:09.000000000 +0100
-+++ b/t/01_utf8.t	2023-09-26 18:58:57.045107151 +0200
++++ b/t/01_utf8.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,43 +1,43 @@
  use Test::More tests => 162;
  use utf8;
@@ -1000,9 +1452,9 @@ diff -purd a/t/01_utf8.t b/t/01_utf8.t
    my $warn = $w;
    {
      no warnings 'utf8';
-diff -purd a/t/02_error.t b/t/02_error.t
+diff -purdN a/t/02_error.t b/t/02_error.t
 --- a/t/02_error.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/02_error.t	2023-09-26 18:58:57.045107151 +0200
++++ b/t/02_error.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,50 +1,50 @@
  use Test::More tests => 36;
  
@@ -1085,9 +1537,9 @@ diff -purd a/t/02_error.t b/t/02_error.t
  
  # RFC 7159: missing optional 2nd allow_nonref arg
  eval { decode_json ("null") }; ok $@ =~ /JSON text must be an object or array/, "null";
-diff -purd a/t/03_types.t b/t/03_types.t
+diff -purdN a/t/03_types.t b/t/03_types.t
 --- a/t/03_types.t	2020-10-27 18:39:09.000000000 +0100
-+++ b/t/03_types.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/03_types.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,22 +1,22 @@
  BEGIN { $| = 1; print "1..87\n"; }
  use utf8;
@@ -1162,9 +1614,9 @@ diff -purd a/t/03_types.t b/t/03_types.t
  
  for $v (1, 2, 3, 5, -1, -2, -3, -4, 100, 1000, 10000, -999, -88, -7, 7, 88, 999, -1e5, 1e6, 1e7, 1e8) {
     ok ($v == ((decode_json "[$v]")->[0]));
-diff -purd a/t/04_dwiw_encode.t b/t/04_dwiw_encode.t
+diff -purdN a/t/04_dwiw_encode.t b/t/04_dwiw_encode.t
 --- a/t/04_dwiw_encode.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/04_dwiw_encode.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/04_dwiw_encode.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,6 +1,6 @@
  #! perl
  
@@ -1191,9 +1643,9 @@ diff -purd a/t/04_dwiw_encode.t b/t/04_dwiw_encode.t
      my $json_str;
      # print STDERR "\n" . $json_str . "\n\n";
  
-diff -purd a/t/05_dwiw_decode.t b/t/05_dwiw_decode.t
+diff -purdN a/t/05_dwiw_decode.t b/t/05_dwiw_decode.t
 --- a/t/05_dwiw_decode.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/05_dwiw_decode.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/05_dwiw_decode.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,6 +1,6 @@
  #! perl
  
@@ -1216,9 +1668,9 @@ diff -purd a/t/05_dwiw_decode.t b/t/05_dwiw_decode.t
      my $data = $json_obj->decode($json_str);
  
      my $pass = 1;
-diff -purd a/t/06_pc_pretty.t b/t/06_pc_pretty.t
+diff -purdN a/t/06_pc_pretty.t b/t/06_pc_pretty.t
 --- a/t/06_pc_pretty.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/06_pc_pretty.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/06_pc_pretty.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,15 +1,15 @@
  #! perl
  
@@ -1298,9 +1750,9 @@ diff -purd a/t/06_pc_pretty.t b/t/06_pc_pretty.t
 + }
  |);
  
-diff -purd a/t/07_pc_esc.t b/t/07_pc_esc.t
+diff -purdN a/t/07_pc_esc.t b/t/07_pc_esc.t
 --- a/t/07_pc_esc.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/07_pc_esc.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/07_pc_esc.t	2023-09-27 10:22:04.530719048 +0200
 @@ -2,18 +2,18 @@
  # このファイルのエンコーディングはUTF-8
  #
@@ -1323,9 +1775,9 @@ diff -purd a/t/07_pc_esc.t b/t/07_pc_esc.t
  
  $obj = {test => qq|abc"def|};
  $str = $pc->encode($obj);
-diff -purd a/t/08_pc_base_nv.t b/t/08_pc_base_nv.t
+diff -purdN a/t/08_pc_base_nv.t b/t/08_pc_base_nv.t
 --- a/t/08_pc_base_nv.t	2020-10-27 18:28:58.000000000 +0100
-+++ b/t/08_pc_base_nv.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/08_pc_base_nv.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,9 +1,9 @@
  use Test::More tests => 1;
  
@@ -1338,9 +1790,9 @@ diff -purd a/t/08_pc_base_nv.t b/t/08_pc_base_nv.t
  my $o = decode_json("[-0.12]");
  
  is($o->[0],"-0.12");
-diff -purd a/t/08_pc_base.t b/t/08_pc_base.t
+diff -purdN a/t/08_pc_base.t b/t/08_pc_base.t
 --- a/t/08_pc_base.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/08_pc_base.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/08_pc_base.t	2023-09-27 10:22:04.530719048 +0200
 @@ -1,13 +1,13 @@
  use Test::More tests => 20;
  
@@ -1358,9 +1810,9 @@ diff -purd a/t/08_pc_base.t b/t/08_pc_base.t
  
  $js  = q|{}|;
  
-diff -purd a/t/09_pc_extra_number.t b/t/09_pc_extra_number.t
+diff -purdN a/t/09_pc_extra_number.t b/t/09_pc_extra_number.t
 --- a/t/09_pc_extra_number.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/09_pc_extra_number.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/09_pc_extra_number.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,14 +1,14 @@
 -# copied over from JSON::PC and modified to use Cpanel::JSON::XS
 +# copied over from JSON::PC and modified to use JSON::XS
@@ -1379,9 +1831,9 @@ diff -purd a/t/09_pc_extra_number.t b/t/09_pc_extra_number.t
  
  $js  = '{"foo":0}';
  $obj = $pc->decode($js);
-diff -purd a/t/104_sortby.t b/t/104_sortby.t
+diff -purdN a/t/104_sortby.t b/t/104_sortby.t
 --- a/t/104_sortby.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/104_sortby.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/104_sortby.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,11 +1,11 @@
  
  use Test::More tests => 3;
@@ -1409,9 +1861,9 @@ diff -purd a/t/104_sortby.t b/t/104_sortby.t
  
 -sub Cpanel::JSON::XS::hoge { $Cpanel::JSON::XS::a cmp $Cpanel::JSON::XS::b }
 +sub JSON::XS::hoge { $JSON::XS::a cmp $JSON::XS::b }
-diff -purd a/t/105_esc_slash.t b/t/105_esc_slash.t
+diff -purdN a/t/105_esc_slash.t b/t/105_esc_slash.t
 --- a/t/105_esc_slash.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/105_esc_slash.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/105_esc_slash.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,10 +1,10 @@
  
  use Test::More tests => 2;
@@ -1425,9 +1877,9 @@ diff -purd a/t/105_esc_slash.t b/t/105_esc_slash.t
  
  my $js = '/';
  
-diff -purd a/t/106_allow_barekey.t b/t/106_allow_barekey.t
+diff -purdN a/t/106_allow_barekey.t b/t/106_allow_barekey.t
 --- a/t/106_allow_barekey.t	2023-02-22 16:34:03.000000000 +0100
-+++ b/t/106_allow_barekey.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/106_allow_barekey.t	2023-09-27 10:22:04.534052479 +0200
 @@ -2,10 +2,10 @@
  use Test::More tests => 6;
  use strict;
@@ -1441,9 +1893,9 @@ diff -purd a/t/106_allow_barekey.t b/t/106_allow_barekey.t
  
  eval q| $json->decode('{foo:"bar"}') |;
  ok($@); # in XS and PP, the error message differs.
-diff -purd a/t/107_allow_singlequote.t b/t/107_allow_singlequote.t
+diff -purdN a/t/107_allow_singlequote.t b/t/107_allow_singlequote.t
 --- a/t/107_allow_singlequote.t	2023-06-19 17:54:15.000000000 +0200
-+++ b/t/107_allow_singlequote.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/107_allow_singlequote.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,10 +1,10 @@
  
  use Test::More tests => 10;
@@ -1457,10 +1909,9 @@ diff -purd a/t/107_allow_singlequote.t b/t/107_allow_singlequote.t
  
  eval q| $json->decode("{'foo':'bar'}") |;
  ok($@, "error $@"); # in XS and PP, the error message differs.
-Only in b/t: 107_allow_singlequote.t.orig
-diff -purd a/t/108_decode.t b/t/108_decode.t
+diff -purdN a/t/108_decode.t b/t/108_decode.t
 --- a/t/108_decode.t	2020-12-14 08:22:05.000000000 +0100
-+++ b/t/108_decode.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/108_decode.t	2023-09-27 10:22:04.534052479 +0200
 @@ -4,12 +4,12 @@
  use strict;
  use Test::More tests => 11;
@@ -1476,9 +1927,9 @@ diff -purd a/t/108_decode.t b/t/108_decode.t
  
  SKIP: {
    skip "5.6", 1 if $] < 5.008;
-diff -purd a/t/109_encode.t b/t/109_encode.t
+diff -purdN a/t/109_encode.t b/t/109_encode.t
 --- a/t/109_encode.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/109_encode.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/109_encode.t	2023-09-27 10:22:04.534052479 +0200
 @@ -4,7 +4,7 @@
  use strict;
  use Test::More tests => 7;
@@ -1497,9 +1948,9 @@ diff -purd a/t/109_encode.t b/t/109_encode.t
  
  is($json->encode("ü"),                   q|"ü"|); # as is
  
-diff -purd a/t/10_pc_keysort.t b/t/10_pc_keysort.t
+diff -purdN a/t/10_pc_keysort.t b/t/10_pc_keysort.t
 --- a/t/10_pc_keysort.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/10_pc_keysort.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/10_pc_keysort.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,13 +1,13 @@
 -# copied over from JSON::PC and modified to use Cpanel::JSON::XS
 +# copied over from JSON::PC and modified to use JSON::XS
@@ -1517,9 +1968,9 @@ diff -purd a/t/10_pc_keysort.t b/t/10_pc_keysort.t
  
  $obj = {a=>1, b=>2, c=>3, d=>4, e=>5, f=>6, g=>7, h=>8, i=>9};
  
-diff -purd a/t/110_bignum.t b/t/110_bignum.t
+diff -purdN a/t/110_bignum.t b/t/110_bignum.t
 --- a/t/110_bignum.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/110_bignum.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/110_bignum.t	2023-09-27 10:22:04.534052479 +0200
 @@ -8,10 +8,10 @@ BEGIN {
  use Test::More $has_bignum
    ? (tests => 17)
@@ -1533,9 +1984,9 @@ diff -purd a/t/110_bignum.t b/t/110_bignum.t
  
  $json->allow_nonref->allow_bignum;
  $json->convert_blessed->allow_blessed;
-diff -purd a/t/112_upgrade.t b/t/112_upgrade.t
+diff -purdN a/t/112_upgrade.t b/t/112_upgrade.t
 --- a/t/112_upgrade.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/112_upgrade.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/112_upgrade.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,13 +1,13 @@
  use strict;
  use Test::More tests => 3;
@@ -1552,9 +2003,9 @@ diff -purd a/t/112_upgrade.t b/t/112_upgrade.t
  my $str  = '\\u00c8';
  
  my $value = $json->decode( '"\\u00c8"' );
-diff -purd a/t/113_overloaded_eq.t b/t/113_overloaded_eq.t
+diff -purdN a/t/113_overloaded_eq.t b/t/113_overloaded_eq.t
 --- a/t/113_overloaded_eq.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/113_overloaded_eq.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/113_overloaded_eq.t	2023-09-27 10:22:04.534052479 +0200
 @@ -3,9 +3,9 @@
  use strict;
  use Test::More tests => 15;
@@ -1596,9 +2047,9 @@ diff -purd a/t/113_overloaded_eq.t b/t/113_overloaded_eq.t
  
  package Foo;
  
-diff -purd a/t/114_decode_prefix.t b/t/114_decode_prefix.t
+diff -purdN a/t/114_decode_prefix.t b/t/114_decode_prefix.t
 --- a/t/114_decode_prefix.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/114_decode_prefix.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/114_decode_prefix.t	2023-09-27 10:22:04.534052479 +0200
 @@ -3,9 +3,9 @@
  use strict;
  use Test::More tests => 12;
@@ -1611,9 +2062,9 @@ diff -purd a/t/114_decode_prefix.t b/t/114_decode_prefix.t
  
  my $complete_text = qq/{"foo":"bar"}/;
  my $garbaged_text  = qq/{"foo":"bar"}\n/;
-diff -purd a/t/115_tie_ixhash.t b/t/115_tie_ixhash.t
+diff -purdN a/t/115_tie_ixhash.t b/t/115_tie_ixhash.t
 --- a/t/115_tie_ixhash.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/115_tie_ixhash.t	2023-09-26 18:58:57.048440581 +0200
++++ b/t/115_tie_ixhash.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,7 +1,7 @@
  
  use strict;
@@ -1641,9 +2092,9 @@ diff -purd a/t/115_tie_ixhash.t b/t/115_tie_ixhash.t
  STR
  
  }
-diff -purd a/t/116_incr_parse_fixed.t b/t/116_incr_parse_fixed.t
+diff -purdN a/t/116_incr_parse_fixed.t b/t/116_incr_parse_fixed.t
 --- a/t/116_incr_parse_fixed.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/116_incr_parse_fixed.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/116_incr_parse_fixed.t	2023-09-27 10:22:04.534052479 +0200
 @@ -3,9 +3,9 @@
  use strict;
  use Test::More tests => 4;
@@ -1665,9 +2116,9 @@ diff -purd a/t/116_incr_parse_fixed.t b/t/116_incr_parse_fixed.t
  
  @vs = $json->incr_parse('"a\"bc');
  ok( not scalar(@vs) );
-diff -purd a/t/117_numbers.t b/t/117_numbers.t
+diff -purdN a/t/117_numbers.t b/t/117_numbers.t
 --- a/t/117_numbers.t	2023-06-19 17:54:15.000000000 +0200
-+++ b/t/117_numbers.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/117_numbers.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,5 +1,5 @@
  use strict;
 -use Cpanel::JSON::XS;
@@ -1702,9 +2153,9 @@ diff -purd a/t/117_numbers.t b/t/117_numbers.t
  is $json->encode([9**9**9]),         '["inf"]',  "inf stringify_infnan(3)";
  is $json->encode([-9**9**9]),        '["-inf"]', "-inf";
  is $json->encode([-sin(9**9**9)]),   '["nan"]',  "nan";
-diff -purd a/t/118_type.t b/t/118_type.t
+diff -purdN a/t/118_type.t b/t/118_type.t
 --- a/t/118_type.t	2022-05-05 16:44:35.000000000 +0200
-+++ b/t/118_type.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/118_type.t	2023-09-27 10:22:04.534052479 +0200
 @@ -3,8 +3,8 @@ use warnings;
  
  use Config;
@@ -1783,9 +2234,9 @@ diff -purd a/t/118_type.t b/t/118_type.t
      my $type_spec = json_type_hashof(json_type_anyof(json_type_arrayof(JSON_TYPE_INT),
                          json_type_hashof(JSON_TYPE_STRING), JSON_TYPE_BOOL));
      my $json_string = $cjson->encode($perl_struct, $type_spec);
-diff -purd a/t/119_type_decode.t b/t/119_type_decode.t
+diff -purdN a/t/119_type_decode.t b/t/119_type_decode.t
 --- a/t/119_type_decode.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/119_type_decode.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/119_type_decode.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,12 +1,12 @@
  use strict;
  use warnings;
@@ -1832,9 +2283,9 @@ diff -purd a/t/119_type_decode.t b/t/119_type_decode.t
      is($value, '1000000000000000000000000');
      is($type, JSON_TYPE_STRING);
  }
-diff -purd a/t/11_pc_expo.t b/t/11_pc_expo.t
+diff -purdN a/t/11_pc_expo.t b/t/11_pc_expo.t
 --- a/t/11_pc_expo.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/11_pc_expo.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/11_pc_expo.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,14 +1,14 @@
 -# copied over from JSON::XS and modified to use Cpanel::JSON::XS
 +# copied over from JSON::XS and modified to use JSON::XS
@@ -1853,9 +2304,9 @@ diff -purd a/t/11_pc_expo.t b/t/11_pc_expo.t
  
  $js  = q|[-12.34]|;
  $obj = $pc->decode($js);
-diff -purd a/t/120_type_all_string.t b/t/120_type_all_string.t
+diff -purdN a/t/120_type_all_string.t b/t/120_type_all_string.t
 --- a/t/120_type_all_string.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/120_type_all_string.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/120_type_all_string.t	2023-09-27 10:22:04.534052479 +0200
 @@ -1,11 +1,11 @@
  use strict;
  use warnings;
@@ -1870,9 +2321,9 @@ diff -purd a/t/120_type_all_string.t b/t/120_type_all_string.t
  
  is($sjson->encode(0), '"0"');
  is($sjson->encode("0"), '"0"');
-diff -purd a/t/121_memleak.t b/t/121_memleak.t
+diff -purdN a/t/121_memleak.t b/t/121_memleak.t
 --- a/t/121_memleak.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/121_memleak.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/121_memleak.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,13 +1,13 @@
  use strict;
  use warnings;
@@ -1889,9 +2340,9 @@ diff -purd a/t/121_memleak.t b/t/121_memleak.t
  
  my $x = '{"some": "json"}';
  $json->decode($x, my $types);
-diff -purd a/t/125_shared_boolean.t b/t/125_shared_boolean.t
+diff -purdN a/t/125_shared_boolean.t b/t/125_shared_boolean.t
 --- a/t/125_shared_boolean.t	2021-10-14 21:15:41.000000000 +0200
-+++ b/t/125_shared_boolean.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/125_shared_boolean.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,7 +1,7 @@
  use strict;
  use Config;
@@ -1931,9 +2382,9 @@ diff -purd a/t/125_shared_boolean.t b/t/125_shared_boolean.t
  }
  
  SKIP: {
-diff -purd a/t/12_blessed.t b/t/12_blessed.t
+diff -purdN a/t/12_blessed.t b/t/12_blessed.t
 --- a/t/12_blessed.t	2023-06-19 17:54:15.000000000 +0200
-+++ b/t/12_blessed.t	2023-09-26 18:59:07.652080958 +0200
++++ b/t/12_blessed.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,5 +1,5 @@
  use strict;
 -use Cpanel::JSON::XS;
@@ -1959,11 +2410,9 @@ diff -purd a/t/12_blessed.t b/t/12_blessed.t
  $js->allow_blessed;
  ok ($js->encode ($o1) eq "null", 'allow_blessed');
  ok ($js->encode ($o2) eq "null");
-Only in b/t: 12_blessed.t.orig
-Only in b/t: 12_blessed.t.rej
-diff -purd a/t/13_limit.t b/t/13_limit.t
+diff -purdN a/t/13_limit.t b/t/13_limit.t
 --- a/t/13_limit.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/13_limit.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/13_limit.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,9 +1,9 @@
  use Test::More $] < 5.008 ? (skip_all => "5.6") : (tests => 11);
 -use Cpanel::JSON::XS;
@@ -1976,9 +2425,9 @@ diff -purd a/t/13_limit.t b/t/13_limit.t
  
  ok (!eval { $js->decode (("[" x ($def + 1)) . ("]" x ($def + 1))) });
  ok (ref $js->decode (("[" x $def) . ("]" x $def)));
-diff -purd a/t/14_latin1.t b/t/14_latin1.t
+diff -purdN a/t/14_latin1.t b/t/14_latin1.t
 --- a/t/14_latin1.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/14_latin1.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/14_latin1.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,8 +1,8 @@
 -use Cpanel::JSON::XS;
 +use JSON::XS;
@@ -2026,9 +2475,9 @@ diff -purd a/t/14_latin1.t b/t/14_latin1.t
 -is(Cpanel::JSON::XS->new->binary->decode ('["I \xe2\x9d\xa4 perl"]')->[0],
 +is(JSON::XS->new->binary->decode ('["I \xe2\x9d\xa4 perl"]')->[0],
     "I \x{e2}\x{9d}\x{a4} perl", 'non-utf8 dec binary');
-diff -purd a/t/15_prefix.t b/t/15_prefix.t
+diff -purdN a/t/15_prefix.t b/t/15_prefix.t
 --- a/t/15_prefix.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/15_prefix.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/15_prefix.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,7 +1,7 @@
  use Test::More tests => 4;
 -use Cpanel::JSON::XS;
@@ -2039,9 +2488,9 @@ diff -purd a/t/15_prefix.t b/t/15_prefix.t
  
  eval { $xs->decode ("[] ") };
  ok (!$@);
-diff -purd a/t/16_tied.t b/t/16_tied.t
+diff -purdN a/t/16_tied.t b/t/16_tied.t
 --- a/t/16_tied.t	2020-12-14 08:22:05.000000000 +0100
-+++ b/t/16_tied.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/16_tied.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,9 +1,9 @@
  use Test::More tests => 4;
 -use Cpanel::JSON::XS;
@@ -2054,9 +2503,9 @@ diff -purd a/t/16_tied.t b/t/16_tied.t
  
  tie my %h, 'Tie::StdHash';
  %h = (a => 1);
-diff -purd a/t/17_relaxed.t b/t/17_relaxed.t
+diff -purdN a/t/17_relaxed.t b/t/17_relaxed.t
 --- a/t/17_relaxed.t	2020-12-14 08:22:05.000000000 +0100
-+++ b/t/17_relaxed.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/17_relaxed.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,7 +1,7 @@
  use Test::More $] < 5.008 ? (skip_all => "5.6") : (tests => 13);
 -use Cpanel::JSON::XS;
@@ -2067,9 +2516,9 @@ diff -purd a/t/17_relaxed.t b/t/17_relaxed.t
  
  is (encode_json ($json->decode (' [1,2, 3]')), '[1,2,3]');
  is (encode_json ($json->decode ('[1,2, 4 , ]')), '[1,2,4]');
-diff -purd a/t/18_json_checker.t b/t/18_json_checker.t
+diff -purdN a/t/18_json_checker.t b/t/18_json_checker.t
 --- a/t/18_json_checker.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/18_json_checker.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/18_json_checker.t	2023-09-27 10:22:04.537385908 +0200
 @@ -7,12 +7,12 @@ use strict;
  no warnings;
  use Test::More $] < 5.008 ? (skip_all => "5.6") : (tests => 39);
@@ -2086,9 +2535,9 @@ diff -purd a/t/18_json_checker.t b/t/18_json_checker.t
  
  binmode DATA;
  
-diff -purd a/t/19_incr.t b/t/19_incr.t
+diff -purdN a/t/19_incr.t b/t/19_incr.t
 --- a/t/19_incr.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/19_incr.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/19_incr.t	2023-09-27 10:22:04.537385908 +0200
 @@ -4,7 +4,7 @@ use strict;
  no warnings;
  use Test::More $] < 5.008 ? (tests => 39) : (tests => 702);
@@ -2164,9 +2613,9 @@ diff -purd a/t/19_incr.t b/t/19_incr.t
     $coder->incr_parse ($text);
     $coder->incr_text;
     is ($@, '', 'incr_text allowed after incr_parse init');
-diff -purd a/t/20_faihu.t b/t/20_faihu.t
+diff -purdN a/t/20_faihu.t b/t/20_faihu.t
 --- a/t/20_faihu.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/20_faihu.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/20_faihu.t	2023-09-27 10:22:04.537385908 +0200
 @@ -5,23 +5,23 @@
  use strict;
  use warnings;
@@ -2195,9 +2644,9 @@ diff -purd a/t/20_faihu.t b/t/20_faihu.t
  $faihu_json = encode 'UTF-16BE', $js->encode ($faihu);
  $roundtrip = $js->decode( decode 'UTF-16BE', $faihu_json);
  is ($roundtrip, $faihu, 'JSON with external recoding roundtrips correctly' );
-diff -purd a/t/20_unknown.t b/t/20_unknown.t
+diff -purdN a/t/20_unknown.t b/t/20_unknown.t
 --- a/t/20_unknown.t	2022-08-10 16:22:51.000000000 +0200
-+++ b/t/20_unknown.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/20_unknown.t	2023-09-27 10:22:04.537385908 +0200
 @@ -9,10 +9,10 @@ BEGIN {
  }
  plan tests => 32;
@@ -2211,9 +2660,9 @@ diff -purd a/t/20_unknown.t b/t/20_unknown.t
  
  eval q| $json->encode( [ sub {} ] ) |;
  ok( $@ =~ /encountered CODE/, $@ );
-diff -purd a/t/21_evans.t b/t/21_evans.t
+diff -purdN a/t/21_evans.t b/t/21_evans.t
 --- a/t/21_evans.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/21_evans.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/21_evans.t	2023-09-27 10:22:04.537385908 +0200
 @@ -5,13 +5,13 @@
  use strict;
  use warnings;
@@ -2231,9 +2680,9 @@ diff -purd a/t/21_evans.t b/t/21_evans.t
  my $object = $j->incr_parse ($js);
  
  die "no object" if !$object;
-diff -purd a/t/22_comment_at_eof.t b/t/22_comment_at_eof.t
+diff -purdN a/t/22_comment_at_eof.t b/t/22_comment_at_eof.t
 --- a/t/22_comment_at_eof.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/22_comment_at_eof.t	2023-09-26 18:58:57.051774010 +0200
++++ b/t/22_comment_at_eof.t	2023-09-27 10:22:04.537385908 +0200
 @@ -5,14 +5,14 @@ use warnings;
  
  use Test::More tests => 13;
@@ -2251,9 +2700,9 @@ diff -purd a/t/22_comment_at_eof.t b/t/22_comment_at_eof.t
  
     $json->incr_parse($_[0]);
  
-diff -purd a/t/23_array_ctx.t b/t/23_array_ctx.t
+diff -purdN a/t/23_array_ctx.t b/t/23_array_ctx.t
 --- a/t/23_array_ctx.t	2020-10-27 18:28:36.000000000 +0100
-+++ b/t/23_array_ctx.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/23_array_ctx.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,19 +1,19 @@
  print "1..5\n";
 -use Cpanel::JSON::XS;
@@ -2280,9 +2729,9 @@ diff -purd a/t/23_array_ctx.t b/t/23_array_ctx.t
 -@foo = Cpanel::JSON::XS->new->filter_json_single_key_object(1 => sub { [], [] })->decode('{"1":0}');
 +@foo = JSON::XS->new->filter_json_single_key_object(1 => sub { [], [] })->decode('{"1":0}');
  print "ok 5\n";
-diff -purd a/t/24_freeze_recursion.t b/t/24_freeze_recursion.t
+diff -purdN a/t/24_freeze_recursion.t b/t/24_freeze_recursion.t
 --- a/t/24_freeze_recursion.t	2020-10-27 18:28:58.000000000 +0100
-+++ b/t/24_freeze_recursion.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/24_freeze_recursion.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,10 +1,10 @@
 -use Cpanel::JSON::XS;
 +use JSON::XS;
@@ -2296,9 +2745,9 @@ diff -purd a/t/24_freeze_recursion.t b/t/24_freeze_recursion.t
      Foo->new(
          foo => Foo->new(@foo_params),
          bar => Foo->new(foo => $foo),
-diff -purd a/t/25_boolean.t b/t/25_boolean.t
+diff -purdN a/t/25_boolean.t b/t/25_boolean.t
 --- a/t/25_boolean.t	2023-07-04 12:27:51.000000000 +0200
-+++ b/t/25_boolean.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/25_boolean.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,6 +1,6 @@
  use strict;
  use Test::More tests => 42;
@@ -2355,9 +2804,9 @@ diff -purd a/t/25_boolean.t b/t/25_boolean.t
  
  
  $js = $unblessed_bool_cjson->decode($booltrue);
-diff -purd a/t/26_duplicate.t b/t/26_duplicate.t
+diff -purdN a/t/26_duplicate.t b/t/26_duplicate.t
 --- a/t/26_duplicate.t	2022-05-05 16:44:35.000000000 +0200
-+++ b/t/26_duplicate.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/26_duplicate.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,8 +1,8 @@
  use strict;
  use Test::More tests => 12;
@@ -2369,9 +2818,9 @@ diff -purd a/t/26_duplicate.t b/t/26_duplicate.t
  
  # disallow dupkeys
  ok (!eval { $json->decode ('{"a":"b","a":"c"}') }); # y_object_duplicated_key.json
-diff -purd a/t/30_jsonspec.t b/t/30_jsonspec.t
+diff -purdN a/t/30_jsonspec.t b/t/30_jsonspec.t
 --- a/t/30_jsonspec.t	2020-10-27 18:40:23.000000000 +0100
-+++ b/t/30_jsonspec.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/30_jsonspec.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,12 +1,12 @@
  # regressions and differences from the JSON Specs and JSON::PP
  # detected by http://seriot.ch/json/parsing.html
@@ -2388,9 +2837,9 @@ diff -purd a/t/30_jsonspec.t b/t/30_jsonspec.t
  
  # fixme:
  #  n_string_UTF8_surrogate_U+D800     ["EDA080"] <=> [""] unicode
-diff -purd a/t/31_bom.t b/t/31_bom.t
+diff -purdN a/t/31_bom.t b/t/31_bom.t
 --- a/t/31_bom.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/31_bom.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/31_bom.t	2023-09-27 10:22:04.537385908 +0200
 @@ -3,12 +3,12 @@
  # https://tools.ietf.org/html/rfc7159#section-8.1
  # JSON text SHALL be encoded in UTF-8, UTF-16, or UTF-32.
@@ -2415,9 +2864,9 @@ diff -purd a/t/31_bom.t b/t/31_bom.t
  
  ok(my $as_json = eval {
      $j->encode({ example => "data with non-ASCII characters",
-diff -purd a/t/52_object.t b/t/52_object.t
+diff -purdN a/t/52_object.t b/t/52_object.t
 --- a/t/52_object.t	2020-10-27 18:28:36.000000000 +0100
-+++ b/t/52_object.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/52_object.t	2023-09-27 10:22:04.537385908 +0200
 @@ -1,20 +1,20 @@
  BEGIN { $| = 1; print "1..20\n"; }
  BEGIN { $^W = 0 } # hate
@@ -2478,9 +2927,9 @@ diff -purd a/t/52_object.t b/t/52_object.t
  
  $dec = $json->decode ($enc);
  print $dec eq 777 ? "" : "not ", "ok 19\n";
-diff -purd a/t/53_readonly.t b/t/53_readonly.t
+diff -purdN a/t/53_readonly.t b/t/53_readonly.t
 --- a/t/53_readonly.t	2020-10-27 18:28:58.000000000 +0100
-+++ b/t/53_readonly.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/53_readonly.t	2023-09-27 10:22:04.537385908 +0200
 @@ -2,9 +2,9 @@
  use strict;
  use warnings;
@@ -2493,9 +2942,9 @@ diff -purd a/t/53_readonly.t b/t/53_readonly.t
  
  sub Foo::TO_JSON {
      return 1;
-diff -purd a/t/54_stringify.t b/t/54_stringify.t
+diff -purdN a/t/54_stringify.t b/t/54_stringify.t
 --- a/t/54_stringify.t	2023-02-22 16:34:03.000000000 +0100
-+++ b/t/54_stringify.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/54_stringify.t	2023-09-27 10:22:04.540719337 +0200
 @@ -11,12 +11,12 @@ BEGIN {
    $ENV{PERL_JSON_BACKEND} = 'JSON::PP';
  }
@@ -2521,9 +2970,9 @@ diff -purd a/t/54_stringify.t b/t/54_stringify.t
  
  is( $pp->encode  ( {false => \"some"} ), '{"false":null}',  'pp \"some"');
  is( $json->encode( {false => \"some"} ), '{"false":"some"}','js \"some"');
-diff -purd a/t/55_modifiable.t b/t/55_modifiable.t
+diff -purdN a/t/55_modifiable.t b/t/55_modifiable.t
 --- a/t/55_modifiable.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/55_modifiable.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/55_modifiable.t	2023-09-27 10:22:04.540719337 +0200
 @@ -2,9 +2,9 @@
  use strict;
  use warnings;
@@ -2536,9 +2985,9 @@ diff -purd a/t/55_modifiable.t b/t/55_modifiable.t
  my @data = ('null', 'true', 'false', "1", "\"test\"");
  my %map = ( 'null' => undef, true => 1, false => 0, 
              '1' => 1, '"test"' => "test" );
-diff -purd a/t/96_interop_pp.t b/t/96_interop_pp.t
+diff -purdN a/t/96_interop_pp.t b/t/96_interop_pp.t
 --- a/t/96_interop_pp.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/96_interop_pp.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/96_interop_pp.t	2023-09-27 10:22:04.540719337 +0200
 @@ -11,10 +11,10 @@ BEGIN {
    $ENV{PERL_JSON_BACKEND} = 0;
  }
@@ -2562,9 +3011,9 @@ diff -purd a/t/96_interop_pp.t b/t/96_interop_pp.t
      my $json = JSON::PP->new;
      $js = $json->decode( $boolstring );
      # bless { is_true => 1}, "Types::Serialiser"
-diff -purd a/t/96_interop.t b/t/96_interop.t
+diff -purdN a/t/96_interop.t b/t/96_interop.t
 --- a/t/96_interop.t	2020-12-14 08:22:05.000000000 +0100
-+++ b/t/96_interop.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/96_interop.t	2023-09-27 10:22:04.540719337 +0200
 @@ -15,8 +15,8 @@ BEGIN {
    }
  }
@@ -2585,9 +3034,9 @@ diff -purd a/t/96_interop.t b/t/96_interop.t
  
  is($cjson->encode( $js ), $boolstring) or diag "\$JSON::XS::VERSION=$JSON::XS::VERSION";
  
-diff -purd a/t/96_mojo.t b/t/96_mojo.t
+diff -purdN a/t/96_mojo.t b/t/96_mojo.t
 --- a/t/96_mojo.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/t/96_mojo.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/96_mojo.t	2023-09-27 10:22:04.540719337 +0200
 @@ -13,7 +13,7 @@ BEGIN {
  }
  
@@ -2610,9 +3059,9 @@ diff -purd a/t/96_mojo.t b/t/96_mojo.t
  
  $js = Mojo::JSON::decode_json( $boolfalse );
  is( $cjson->encode( $js ), $boolfalse, 'can encode Mojo false' );
-diff -purd a/t/97_unshare_hek.t b/t/97_unshare_hek.t
+diff -purdN a/t/97_unshare_hek.t b/t/97_unshare_hek.t
 --- a/t/97_unshare_hek.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/97_unshare_hek.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/97_unshare_hek.t	2023-09-27 10:22:04.540719337 +0200
 @@ -1,7 +1,7 @@
  # shared hek destruction. with debugging perls or valgrind only
  # https://github.com/rurban/Cpanel-JSON-XS/issues/10
@@ -2622,9 +3071,9 @@ diff -purd a/t/97_unshare_hek.t b/t/97_unshare_hek.t
  my %h = ('{"foo":"bar"}' => 1);
  while (my ($k) = each %h) {
      my $obj = decode_json($k);
-diff -purd a/t/98_56only.t b/t/98_56only.t
+diff -purdN a/t/98_56only.t b/t/98_56only.t
 --- a/t/98_56only.t	2015-01-31 20:57:23.000000000 +0100
-+++ b/t/98_56only.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/98_56only.t	2023-09-27 10:22:04.540719337 +0200
 @@ -1,6 +1,6 @@
  use Test::More tests => 4;
  # $] < 5.008 ? (tests => 4) : (skip_all => "5.6 only");
@@ -2651,9 +3100,9 @@ diff -purd a/t/98_56only.t b/t/98_56only.t
  $js  = q|[-12.34]|;
  $obj = $json->decode($js);
  is($obj->[0], -12.34, 'digit -12.34');
-diff -purd a/t/99_binary.t b/t/99_binary.t
+diff -purdN a/t/99_binary.t b/t/99_binary.t
 --- a/t/99_binary.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/99_binary.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/99_binary.t	2023-09-27 10:22:04.540719337 +0200
 @@ -1,10 +1,10 @@
  use Test::More tests => 300;
 -use Cpanel::JSON::XS;
@@ -2669,9 +3118,9 @@ diff -purd a/t/99_binary.t b/t/99_binary.t
  
  sub test($) {
    my $c = $_[0];
-diff -purd a/t/zero-mojibake.t b/t/zero-mojibake.t
+diff -purdN a/t/zero-mojibake.t b/t/zero-mojibake.t
 --- a/t/zero-mojibake.t	2020-10-27 18:29:11.000000000 +0100
-+++ b/t/zero-mojibake.t	2023-09-26 18:58:57.055107440 +0200
++++ b/t/zero-mojibake.t	2023-09-27 10:22:04.540719337 +0200
 @@ -2,8 +2,8 @@
  
  use strict;
@@ -2683,9 +3132,9 @@ diff -purd a/t/zero-mojibake.t b/t/zero-mojibake.t
  
  my $input = q[
  {
-diff -purd a/typemap b/typemap
+diff -purdN a/typemap b/typemap
 --- a/typemap	2020-10-27 18:29:23.000000000 +0100
-+++ b/typemap	2023-09-26 18:58:57.055107440 +0200
++++ b/typemap	2023-09-27 10:22:04.540719337 +0200
 @@ -7,12 +7,12 @@ T_JSON
  	if (!(
             SvROK ($arg)
@@ -2702,9 +3151,9 @@ diff -purd a/typemap b/typemap
          }
          $var = (JSON *)SvPVX (SvRV ($arg));
  
-diff -purd a/XS/Boolean.pm b/XS/Boolean.pm
+diff -purdN a/XS/Boolean.pm b/XS/Boolean.pm
 --- a/XS/Boolean.pm	2020-10-27 18:39:09.000000000 +0100
-+++ b/XS/Boolean.pm	2023-09-26 18:58:57.055107440 +0200
++++ b/XS/Boolean.pm	2023-09-27 10:22:04.540719337 +0200
 @@ -1,22 +1,22 @@
  =head1 NAME
  
@@ -2732,9 +3181,9 @@ diff -purd a/XS/Boolean.pm b/XS/Boolean.pm
  
  1;
  
-diff -purd a/XS/Type.pm b/XS/Type.pm
+diff -purdN a/XS/Type.pm b/XS/Type.pm
 --- a/XS/Type.pm	2020-10-27 18:39:09.000000000 +0100
-+++ b/XS/Type.pm	2023-09-26 18:58:57.055107440 +0200
++++ b/XS/Type.pm	2023-09-27 10:22:04.540719337 +0200
 @@ -1,15 +1,15 @@
 -package Cpanel::JSON::XS::Type;
 +package JSON::XS::Type;
@@ -2826,21 +3275,23 @@ diff -purd a/XS/Type.pm b/XS/Type.pm
  
  sub json_type_anyof {
    my ($scalar, $array, $hash);
-diff -purd a/XS.pm b/XS.pm
+diff -purdN a/XS.pm b/XS.pm
 --- a/XS.pm	2023-07-04 12:31:38.000000000 +0200
-+++ b/XS.pm	2023-09-26 19:00:00.220269810 +0200
++++ b/XS.pm	2023-09-27 10:28:27.008442575 +0200
 @@ -1,4 +1,4 @@
 -package Cpanel::JSON::XS;
 +package JSON::XS;
  our $VERSION = '4.37';
  our $XS_VERSION = $VERSION;
  # $VERSION = eval $VERSION;
-@@ -7,11 +7,11 @@ our $XS_VERSION = $VERSION;
+@@ -7,11 +7,13 @@ our $XS_VERSION = $VERSION;
  
  =head1 NAME
  
 -Cpanel::JSON::XS - cPanel fork of JSON::XS, fast and correct serializing
 +JSON::XS - JSON::XS, fast and correct serializing
++
++This version is Cpanel::JSON::XS masquerading as JSON::XS
  
  =head1 SYNOPSIS
  
@@ -2849,7 +3300,7 @@ diff -purd a/XS.pm b/XS.pm
  
   # exported functions, they croak on error
   # and expect/generate UTF-8
-@@ -21,14 +21,14 @@ Cpanel::JSON::XS - cPanel fork of JSON::
+@@ -21,14 +23,14 @@ Cpanel::JSON::XS - cPanel fork of JSON::
  
   # OO-interface
  
@@ -2866,7 +3317,7 @@ diff -purd a/XS.pm b/XS.pm
   # if available, at virtually no speed overhead either, so you should
   # be able to just:
   
-@@ -51,9 +51,7 @@ modules, none of them correctly handle a
+@@ -51,9 +53,7 @@ modules, none of them correctly handle a
  their maintainers are unresponsive, gone missing, or not listening to bug
  reports for other reasons.
  
@@ -2877,7 +3328,7 @@ diff -purd a/XS.pm b/XS.pm
  values and vice versa.
  
  =head2 FEATURES
-@@ -121,7 +119,7 @@ B<Changes to JSON::XS>
+@@ -121,7 +121,7 @@ B<Changes to JSON::XS>
  - fixed encode of numbers for dual-vars. Different string
    representations are preserved, but numbers with temporary strings
    which represent the same number are here treated as numbers, not
@@ -2886,7 +3337,7 @@ diff -purd a/XS.pm b/XS.pm
    types better.
  
  - numbers ending with .0 stray numbers, are not converted to
-@@ -141,8 +139,8 @@ B<Changes to JSON::XS>
+@@ -141,8 +141,8 @@ B<Changes to JSON::XS>
  
  - interop for true/false overloading. JSON::XS, JSON::PP and Mojo::JSON 
    representations for booleans are accepted and JSON::XS accepts
@@ -2897,7 +3348,7 @@ diff -purd a/XS.pm b/XS.pm
    to "1", not "true", analog to all other JSON modules.
  
  - native boolean mapping of yes and no to true and false, as in YAML::XS.
-@@ -152,7 +150,7 @@ B<Changes to JSON::XS>
+@@ -152,7 +152,7 @@ B<Changes to JSON::XS>
  - support arbitrary stringification with encode, with convert_blessed
    and allow_blessed.
  
@@ -2906,7 +3357,7 @@ diff -purd a/XS.pm b/XS.pm
  
  - is_bool can be called as method, JSON::XS::is_bool not.
  
-@@ -220,8 +218,8 @@ our @EXPORT = qw(encode_json decode_json
+@@ -220,8 +220,8 @@ our @EXPORT = qw(encode_json decode_json
  sub to_json($@) {
     if ($] >= 5.008) {
       require Carp;
@@ -2917,7 +3368,7 @@ diff -purd a/XS.pm b/XS.pm
                    " rename the call");
     } else {
       _to_json(@_);
-@@ -231,8 +229,8 @@ sub to_json($@) {
+@@ -231,8 +231,8 @@ sub to_json($@) {
  sub from_json($@) {
     if ($] >= 5.008) {
       require Carp;
@@ -2928,7 +3379,7 @@ diff -purd a/XS.pm b/XS.pm
                    " rename the call");
     } else {
       _from_json(@_);
-@@ -256,11 +254,11 @@ Converts the given Perl data structure t
+@@ -256,11 +256,11 @@ Converts the given Perl data structure t
  
  This function call is functionally identical to:
  
@@ -2942,7 +3393,7 @@ diff -purd a/XS.pm b/XS.pm
  
  =item $perl_scalar = decode_json $json_text [, $allow_nonref [, my $json_type ] ]
  
-@@ -270,11 +268,11 @@ returning the resulting reference. Croak
+@@ -270,11 +270,11 @@ returning the resulting reference. Croak
  
  This function call is functionally identical to:
  
@@ -2956,7 +3407,7 @@ diff -purd a/XS.pm b/XS.pm
  3.0116 and JSON::XS did not set allow_nonref but allowed them due to a
  bug in the decoder.
  
-@@ -285,9 +283,9 @@ arrays, strings, numbers, "null", "true"
+@@ -285,9 +285,9 @@ arrays, strings, numbers, "null", "true"
  See L</"OLD" VS. "NEW" JSON (RFC 4627 VS. RFC 7159)> below, why you don't
  want to do that.
  
@@ -2968,7 +3419,7 @@ diff -purd a/XS.pm b/XS.pm
  
  Returns true if the passed scalar represents either C<JSON::PP::true>
  or C<JSON::PP::false>, two constants that act like C<1> and C<0>,
-@@ -373,7 +371,7 @@ decoding style, within the limits of sup
+@@ -373,7 +373,7 @@ decoding style, within the limits of sup
  
  =over 4
  
@@ -2977,7 +3428,7 @@ diff -purd a/XS.pm b/XS.pm
  
  Creates a new JSON object that can be used to de/encode JSON
  strings. All boolean flags described below are by default I<disabled>.
-@@ -381,7 +379,7 @@ strings. All boolean flags described bel
+@@ -381,7 +381,7 @@ strings. All boolean flags described bel
  The mutators for flags all return the JSON object again and thus calls can
  be chained:
  
@@ -2986,7 +3437,7 @@ diff -purd a/XS.pm b/XS.pm
     => {"a": [1, 2]}
  
  =item $json = $json->ascii ([$enable])
-@@ -407,7 +405,7 @@ The main use for this flag is to produce
+@@ -407,7 +407,7 @@ The main use for this flag is to produce
  transmitted over a 7-bit channel, as the encoded JSON texts will not
  contain any 8 bit characters.
  
@@ -2995,7 +3446,7 @@ diff -purd a/XS.pm b/XS.pm
    => ["\ud801\udc01"]
  
  =item $json = $json->latin1 ([$enable])
-@@ -435,7 +433,7 @@ transferring), a rare encoding for JSON.
+@@ -435,7 +435,7 @@ transferring), a rare encoding for JSON.
  you want to store data structures known to contain binary data efficiently
  in files or databases, not when talking to other JSON encoders/decoders.
  
@@ -3004,7 +3455,7 @@ diff -purd a/XS.pm b/XS.pm
    => ["\x{89}\\u0abc"]    # (perl syntax, U+abc escaped, U+89 not)
  
  
-@@ -477,17 +475,17 @@ databases, not when talking to other JSO
+@@ -477,17 +477,17 @@ databases, not when talking to other JSO
  binary decoding method can also be used when an encoder produced a
  non-JSON conformant hex or octal encoding C<\xNN> or C<\NNN>.
  
@@ -3026,7 +3477,7 @@ diff -purd a/XS.pm b/XS.pm
    Error: illegal hex character in non-binary string
  
  
-@@ -514,12 +512,12 @@ document.
+@@ -514,12 +514,12 @@ document.
  Example, output UTF-16BE-encoded JSON:
  
    use Encode;
@@ -3041,7 +3492,7 @@ diff -purd a/XS.pm b/XS.pm
  
  =item $json = $json->pretty ([$enable])
  
-@@ -529,7 +527,7 @@ generate the most readable (or most comp
+@@ -529,7 +529,7 @@ generate the most readable (or most comp
  
  Example, pretty-print some simple structure:
  
@@ -3050,7 +3501,7 @@ diff -purd a/XS.pm b/XS.pm
     =>
     {
        "a" : [
-@@ -814,7 +812,7 @@ JSON object or array.
+@@ -814,7 +814,7 @@ JSON object or array.
  Example, encode a Perl scalar as JSON value with enabled C<allow_nonref>,
  resulting in an invalid JSON text:
  
@@ -3059,7 +3510,7 @@ diff -purd a/XS.pm b/XS.pm
     => "Hello, World!"
  
  =item $json = $json->allow_unknown ([$enable])
-@@ -856,7 +854,7 @@ encoders.  So it is not recommended to u
+@@ -856,7 +856,7 @@ encoders.  So it is not recommended to u
  
  If C<$enable> is true (or missing), then C<encode> will require
  either enabled C<type_all_string> or second argument with supplied JSON types.
@@ -3068,7 +3519,7 @@ diff -purd a/XS.pm b/XS.pm
  second argument is not provided (or is undef), then C<encode>
  croaks. It also croaks when the type for provided structure in
  C<encode> is incomplete.
-@@ -875,7 +873,7 @@ different for different Perl versions an
+@@ -875,7 +875,7 @@ different for different Perl versions an
  
  This is useful it you need deterministic JSON types, independently of used
  Perl version and other modules, but do not want to write complicated type
@@ -3077,7 +3528,7 @@ diff -purd a/XS.pm b/XS.pm
  
  =item $json = $json->allow_dupkeys ([$enable])
  
-@@ -992,7 +990,7 @@ way.
+@@ -992,7 +992,7 @@ way.
  
  Example, convert all JSON objects into the integer 5:
  
@@ -3086,7 +3537,7 @@ diff -purd a/XS.pm b/XS.pm
     # returns [5]
     $js->decode ('[{}]')
     # throw an exception because allow_nonref is not enabled
-@@ -1031,7 +1029,7 @@ Example, decode JSON objects of the form
+@@ -1031,7 +1031,7 @@ Example, decode JSON objects of the form
  into the corresponding C<< $WIDGET{<id>} >> object:
  
     # return whatever is in $WIDGET{5}:
@@ -3095,7 +3546,7 @@ diff -purd a/XS.pm b/XS.pm
        ->new
        ->filter_json_single_key_object (__widget__ => sub {
              $WIDGET{ $_[0] }
-@@ -1124,7 +1122,7 @@ See L</SECURITY CONSIDERATIONS>, below,
+@@ -1124,7 +1124,7 @@ See L</SECURITY CONSIDERATIONS>, below,
  
  =item $infnan_mode = $json->get_stringify_infnan
  
@@ -3104,7 +3555,7 @@ diff -purd a/XS.pm b/XS.pm
  values. Also qnan, snan or negative nan on some platforms.
  
  C<null>:     infnan_mode = 0. Similar to most JSON modules in other languages.
-@@ -1150,7 +1148,7 @@ arrays become JSON arrays and references
+@@ -1150,7 +1150,7 @@ arrays become JSON arrays and references
  objects. Undefined Perl values (e.g. C<undef>) become JSON C<null>
  values. Neither C<true> nor C<false> values will be generated.
  
@@ -3113,7 +3564,7 @@ diff -purd a/XS.pm b/XS.pm
  
  =item $perl_scalar = $json->decode ($json_text, my $json_type)
  
-@@ -1161,7 +1159,7 @@ JSON numbers and strings become simple P
+@@ -1161,7 +1161,7 @@ JSON numbers and strings become simple P
  Perl arrayrefs and JSON objects become Perl hashrefs. C<true> becomes
  C<1>, C<false> becomes C<0> and C<null> becomes C<undef>.
  
@@ -3122,7 +3573,7 @@ diff -purd a/XS.pm b/XS.pm
  
  =item ($perl_scalar, $characters) = $json->decode_prefix ($json_text)
  
-@@ -1173,7 +1171,7 @@ so far.
+@@ -1173,7 +1173,7 @@ so far.
  This is useful if your JSON texts are not delimited by an outer protocol
  and you need to know where the JSON text ends.
  
@@ -3131,7 +3582,7 @@ diff -purd a/XS.pm b/XS.pm
     => ([1], 3)
  
  =item $json->to_json ($perl_hash_or_arrayref)
-@@ -1198,7 +1196,7 @@ using C<decode_prefix> to see if a full
+@@ -1198,7 +1198,7 @@ using C<decode_prefix> to see if a full
  is much more efficient (and can be implemented with a minimum of method
  calls).
  
@@ -3140,7 +3591,7 @@ diff -purd a/XS.pm b/XS.pm
  sure it has enough text to get a decisive result, using a very simple
  but truly incremental parser. This means that it sometimes won't stop
  as early as the full parser, for example, it doesn't detect mismatched
-@@ -1242,7 +1240,7 @@ lost.
+@@ -1242,7 +1242,7 @@ lost.
  Example: Parse some JSON arrays/objects in a given string and return
  them.
  
@@ -3149,7 +3600,7 @@ diff -purd a/XS.pm b/XS.pm
  
  =item $lvalue_string = $json->incr_text (>5.8 only)
  
-@@ -1293,7 +1291,7 @@ does not hold true for JSON numbers, how
+@@ -1293,7 +1293,7 @@ does not hold true for JSON numbers, how
  For example, is the string C<1> a single JSON number, or is it simply
  the start of C<12>? Or is C<12> a single JSON number, or the
  concatenation of C<1> and C<2>? In neither case you can tell, and this
@@ -3158,7 +3609,7 @@ diff -purd a/XS.pm b/XS.pm
  this case.
  
  =head2 EXAMPLES
-@@ -1304,7 +1302,7 @@ the start of a string and identify the p
+@@ -1304,7 +1304,7 @@ the start of a string and identify the p
  
     my $text = "[1,2,3] hello";
  
@@ -3167,7 +3618,7 @@ diff -purd a/XS.pm b/XS.pm
  
     my $obj = $json->incr_parse ($text)
        or die "expected JSON object or array at beginning of string";
-@@ -1324,7 +1322,7 @@ with C<telnet>...).
+@@ -1324,7 +1324,7 @@ with C<telnet>...).
  Here is how you'd do it (it is trivial to write this in an event-based
  manner):
  
@@ -3176,7 +3627,7 @@ diff -purd a/XS.pm b/XS.pm
  
     # read some data from the socket
     while (sysread $socket, my $buf, 4096) {
-@@ -1341,7 +1339,7 @@ or arrays, all separated by (optional) c
+@@ -1341,7 +1341,7 @@ or arrays, all separated by (optional) c
  and here is where the lvalue-ness of C<incr_text> comes in useful:
  
     my $text = "[1],[2], [3]";
@@ -3185,7 +3636,7 @@ diff -purd a/XS.pm b/XS.pm
  
     # void context, so no parsing done
     $json->incr_parse ($text);
-@@ -1361,12 +1359,12 @@ but you cannot load it into memory fully
+@@ -1361,12 +1361,12 @@ but you cannot load it into memory fully
  the real world :).
  
  Well, you lost, you have to implement your own JSON parser. But
@@ -3200,7 +3651,7 @@ diff -purd a/XS.pm b/XS.pm
  
     # open the monster
     open my $fh, "<bigfile.json"
-@@ -1453,7 +1451,7 @@ order mark rather than treating it as an
+@@ -1453,7 +1453,7 @@ order mark rather than treating it as an
  
  See also L<http://www.unicode.org/faq/utf_bom.html#BOM>.
  
@@ -3209,7 +3660,7 @@ diff -purd a/XS.pm b/XS.pm
  does accept and decode a BOM.
  
  The latest JSON spec
-@@ -1463,7 +1461,7 @@ Thus in subsequent updates BOM's of UTF-
+@@ -1463,7 +1463,7 @@ Thus in subsequent updates BOM's of UTF-
  
  =head1 MAPPING
  
@@ -3218,7 +3669,7 @@ diff -purd a/XS.pm b/XS.pm
  values and vice versa. These mappings are designed to "do the right
  thing" in most circumstances automatically, preserving round-tripping
  characteristics (what you put in comes out as something equivalent).
-@@ -1500,7 +1498,7 @@ the Perl level, there is no difference b
+@@ -1500,7 +1500,7 @@ the Perl level, there is no difference b
  the conversion details, but an integer may take slightly less memory and
  might represent more values exactly than floating point numbers.
  
@@ -3227,7 +3678,7 @@ diff -purd a/XS.pm b/XS.pm
  represent it as an integer value. If that fails, it will try to
  represent it as a numeric (floating point) value if that is possible
  without loss of precision. Otherwise it will preserve the number as a
-@@ -1514,7 +1512,7 @@ the JSON number will still be re-encoded
+@@ -1514,7 +1514,7 @@ the JSON number will still be re-encoded
  
  Note that precision is not accuracy - binary floating point values
  cannot represent most decimal fractions exactly, and when converting
@@ -3236,7 +3687,7 @@ diff -purd a/XS.pm b/XS.pm
  up to but not including the least significant bit.
  
  =item true, false
-@@ -1526,16 +1524,16 @@ Otherwise these JSON atoms become C<JSON
+@@ -1526,16 +1526,16 @@ Otherwise these JSON atoms become C<JSON
  C<JSON::PP::false>, respectively. They are C<JSON::PP::Boolean>
  objects and are overloaded to act almost exactly like the numbers C<1>
  and C<0>. You can check whether a scalar is a JSON boolean by using
@@ -3256,7 +3707,7 @@ diff -purd a/XS.pm b/XS.pm
      print($json->encode([!$false], [JSON_TYPE_BOOL]));
      => [true]
  
-@@ -1574,10 +1572,10 @@ a Perl value.
+@@ -1574,10 +1574,10 @@ a Perl value.
  Perl hash references become JSON objects. As there is no inherent ordering
  in hash keys (or JSON objects), they will usually be encoded in a
  pseudo-random order that can change between runs of the same program but
@@ -3269,7 +3720,7 @@ diff -purd a/XS.pm b/XS.pm
  and is only rarely useful, e.g. when you want to compare some JSON text
  against another for equality.
  
-@@ -1604,13 +1602,13 @@ return C<null> instead.
+@@ -1604,13 +1604,13 @@ return C<null> instead.
     allow_stringify->encode_json [\"x"] # yields "x" unlike JSON::PP
     allow_unknown->encode_json [\"x"]   # yields null as in JSON::PP
  
@@ -3285,7 +3736,7 @@ diff -purd a/XS.pm b/XS.pm
     encode_json [!1, !0], [JSON_TYPE_BOOL, JSON_TYPE_BOOL] # yields [false,true]
  
  eq/ne comparisons with true, false:
-@@ -1624,7 +1622,7 @@ true is eq to the string 'true' or to th
+@@ -1624,7 +1624,7 @@ true is eq to the string 'true' or to th
  =item blessed objects
  
  Blessed objects are not directly representable in JSON, but
@@ -3294,7 +3745,7 @@ diff -purd a/XS.pm b/XS.pm
  objects. See L<OBJECT SERIALIZATION>, below, for details.
  
  See the C<allow_blessed> and C<convert_blessed> methods on various
-@@ -1636,13 +1634,13 @@ your own serializer method.
+@@ -1636,13 +1636,13 @@ your own serializer method.
  =item simple scalars
  
  Simple Perl scalars (any scalar that is not a reference) are the most
@@ -3310,7 +3761,7 @@ diff -purd a/XS.pm b/XS.pm
  
  Alternative way for deterministic types is to use C<type_all_string>
  method when all perl scalars are encoded to JSON strings.
-@@ -1704,7 +1702,7 @@ tagged values.
+@@ -1704,7 +1704,7 @@ tagged values.
  
  =head3 SERIALIZATION
  
@@ -3319,7 +3770,7 @@ diff -purd a/XS.pm b/XS.pm
  on the C<allow_blessed>, C<convert_blessed> and C<allow_tags>
  settings, which are used in this order:
  
-@@ -1712,7 +1710,7 @@ settings, which are used in this order:
+@@ -1712,7 +1712,7 @@ settings, which are used in this order:
  
  =item 1. C<allow_tags> is enabled and the object has a C<FREEZE> method.
  
@@ -3328,7 +3779,7 @@ diff -purd a/XS.pm b/XS.pm
  serialization protocol to create a tagged JSON value, using a nonstandard
  extension to the JSON syntax.
  
-@@ -1776,7 +1774,7 @@ The object will be serialized as a JSON
+@@ -1776,7 +1776,7 @@ The object will be serialized as a JSON
  =item 5. none of the above
  
  If none of the settings are enabled or the respective methods are missing,
@@ -3337,7 +3788,7 @@ diff -purd a/XS.pm b/XS.pm
  
  =back
  
-@@ -1793,7 +1791,7 @@ This section only considers the tagged v
+@@ -1793,7 +1793,7 @@ This section only considers the tagged v
  is encountered during decoding and C<allow_tags> is disabled, a parse
  error will result (as if tagged values were not part of the grammar).
  
@@ -3346,7 +3797,7 @@ diff -purd a/XS.pm b/XS.pm
  of the package/classname used during serialization (it will not attempt
  to load the package as a Perl module). If there is no such method, the
  decoding will fail with an error.
-@@ -1942,7 +1940,7 @@ JSON strings, but are not allowed in ECM
+@@ -1942,7 +1942,7 @@ JSON strings, but are not allowed in ECM
  following Perl fragment will not output something that can be guaranteed
  to be parsable by javascript's C<eval>:
  
@@ -3355,7 +3806,7 @@ diff -purd a/XS.pm b/XS.pm
  
     print encode_json [chr 0x2028];
  
-@@ -1953,16 +1951,16 @@ F<json2.js> parser).
+@@ -1953,16 +1953,16 @@ F<json2.js> parser).
  If this is not an option, you can, as a stop-gap measure, simply encode to
  ASCII-only JSON:
  
@@ -3375,7 +3826,7 @@ diff -purd a/XS.pm b/XS.pm
     $json =~ s/\xe2\x80\xa8/\\u2028/g; # escape U+2028
     $json =~ s/\xe2\x80\xa9/\\u2029/g; # escape U+2029
     print $json;
-@@ -2003,11 +2001,11 @@ If you know of other incompatibilities,
+@@ -2003,11 +2003,11 @@ If you know of other incompatibilities,
  
  You often hear that JSON is a subset of YAML.  I<in general, there is
  no way to configure JSON::XS to output a data structure as valid YAML>
@@ -3389,7 +3840,7 @@ diff -purd a/XS.pm b/XS.pm
     my $yaml = $to_yaml->encode ($ref) . "\n";
  
  This will I<usually> generate JSON texts that also parse as valid
-@@ -2036,8 +2034,8 @@ L<http://dist.schmorp.de/misc/json/short
+@@ -2036,8 +2036,8 @@ L<http://dist.schmorp.de/misc/json/short
     1,  0]}
  
  It shows the number of encodes/decodes per second (JSON::XS uses
@@ -3400,7 +3851,7 @@ diff -purd a/XS.pm b/XS.pm
  shrink. JSON::DWIW/DS uses the deserialize function, while JSON::DWIW::FJ
  uses the from_json method). Higher is better:
  
-@@ -2088,11 +2086,11 @@ For updated graphs see L<https://github.
+@@ -2088,11 +2088,11 @@ For updated graphs see L<https://github.
  =head1 INTEROP with JSON and JSON::XS and other JSON modules
  
  As long as you only serialize data that can be directly expressed in
@@ -3414,7 +3865,7 @@ diff -purd a/XS.pm b/XS.pm
  L<http://seriot.ch/projects/parsing_json.html> tests, while being the fastest also.
  
  When you have trouble decoding JSON generated by this module using other
-@@ -2108,19 +2106,19 @@ totally insecure and not outputting vali
+@@ -2108,19 +2108,19 @@ totally insecure and not outputting vali
  
  JSON-XS-3.01 broke interoperability with JSON-2.90 with booleans. See L<JSON>.
  
@@ -3438,7 +3889,7 @@ diff -purd a/XS.pm b/XS.pm
  objects as booleans.
  
  I cannot think of any reason to still use JSON::XS anymore.
-@@ -2190,7 +2188,7 @@ will change.
+@@ -2190,7 +2190,7 @@ will change.
  
  =head1 SECURITY CONSIDERATIONS
  
@@ -3447,7 +3898,7 @@ diff -purd a/XS.pm b/XS.pm
  most secure serializing format, because it is the only one besides
  Data::MessagePack, which does not deserialize objects per default. For
  all languages, not just perl.  The binary variant BSON (MongoDB) does
-@@ -2239,7 +2237,7 @@ it into a Perl structure. While JSON::XS
+@@ -2239,7 +2239,7 @@ it into a Perl structure. While JSON::XS
  text, it might be too late when you already have it in memory, so you
  might want to check the size before you accept the string.
  
@@ -3456,7 +3907,7 @@ diff -purd a/XS.pm b/XS.pm
  arrays. The C stack is a limited resource: for instance, on my amd64
  machine with 8MB of stack size I can decode around 180k nested arrays but
  only 14k nested JSON objects (due to perl itself recursing deeply on croak
-@@ -2248,12 +2246,12 @@ conservative, the default nesting limit
+@@ -2248,12 +2248,12 @@ conservative, the default nesting limit
  has a smaller stack, you should adjust this setting accordingly with the
  C<max_depth> method.
  
@@ -3471,7 +3922,7 @@ diff -purd a/XS.pm b/XS.pm
  by JavaScript scripts in a browser you should have a look at
  L<http://blog.archive.jpsykes.com/47/practical-csrf-and-json-security/> to
  see whether you are vulnerable to some common attack vectors (which really
-@@ -2264,9 +2262,9 @@ special escape rules to prevent from XSS
+@@ -2264,9 +2264,9 @@ special escape rules to prevent from XSS
  
  =head1 "OLD" VS. "NEW" JSON (RFC 4627 VS. RFC 7159)
  
@@ -3483,7 +3934,7 @@ diff -purd a/XS.pm b/XS.pm
  
  
     my $json = JSON::XS->new->allow_nonref;
-@@ -2304,7 +2302,7 @@ future versions are safe.
+@@ -2304,7 +2304,7 @@ future versions are safe.
  
  =head1 THREADS
  
@@ -3492,7 +3943,7 @@ diff -purd a/XS.pm b/XS.pm
  encounter any bugs with thread support please report them.
  
  From Version 4.00 - 4.19 you couldn't encode true with threads::shared
-@@ -2312,7 +2310,7 @@ magic.
+@@ -2312,7 +2312,7 @@ magic.
  
  =head1 BUGS
  
@@ -3501,7 +3952,7 @@ diff -purd a/XS.pm b/XS.pm
  unfortunately does not mean it's bug-free, only that the author thinks
  its design is bug-free. If you keep reporting bugs and tests they will
  be fixed swiftly, though.
-@@ -2321,8 +2319,8 @@ Since the JSON::XS author refuses to use
+@@ -2321,8 +2321,8 @@ Since the JSON::XS author refuses to use
  prefers private emails, we use the tracker at B<github>, so you might want
  to report any issues twice. Once in private to MLEHMANN to be fixed in
  JSON::XS and one to our the public tracker. Issues fixed by JSON::XS
@@ -3512,7 +3963,7 @@ diff -purd a/XS.pm b/XS.pm
  serializer of choice.
  
  L<https://github.com/rurban/Cpanel-JSON-XS/issues>
-@@ -2398,6 +2396,8 @@ BEGIN {
+@@ -2398,6 +2398,8 @@ BEGIN {
    my $const_false = $false;
    *true  = sub () { $const_true  };
    *false = sub () { $const_false };
@@ -3521,7 +3972,7 @@ diff -purd a/XS.pm b/XS.pm
  }
  
  sub is_bool($) {
-@@ -2406,13 +2406,13 @@ sub is_bool($) {
+@@ -2406,13 +2408,13 @@ sub is_bool($) {
    or (exists $INC{'Types/Serialiser.pm'} and Types::Serialiser::is_bool($_[0]))
  }
  
@@ -3537,11 +3988,9 @@ diff -purd a/XS.pm b/XS.pm
  
  L<JSON>, L<JSON::XS>, L<JSON::MaybeXS>, L<Mojo::JSON>, L<Mojo::JSON::MaybeXS>,
  L<JSON::SL>, L<JSON::DWIW>, L<JSON::YAJL>,  L<JSON::Any>, L<Test::JSON>,
-Only in b: XS.pm.orig
-Only in b: XS.pm.rej
-diff -purd a/XS.xs b/XS.xs
+diff -purdN a/XS.xs b/XS.xs
 --- a/XS.xs	2023-07-04 12:27:51.000000000 +0200
-+++ b/XS.xs	2023-09-26 18:58:57.058440870 +0200
++++ b/XS.xs	2023-09-27 10:22:04.544052768 +0200
 @@ -320,10 +320,10 @@ mingw_modfl(long double x, long double *
  #define JSON_TYPE_NULL         JSON_TYPE_CAN_BE_NULL
  
@@ -3636,10 +4085,9 @@ diff -purd a/XS.xs b/XS.xs
          )));
  
  void ascii (JSON *self, int enable = 1)
-Only in b: XS.xs.orig
-diff -purd a/xt/gh70-asan.t b/xt/gh70-asan.t
+diff -purdN a/xt/gh70-asan.t b/xt/gh70-asan.t
 --- a/xt/gh70-asan.t	2020-10-27 18:39:10.000000000 +0100
-+++ b/xt/gh70-asan.t	2023-09-26 18:58:57.058440870 +0200
++++ b/xt/gh70-asan.t	2023-09-27 10:22:04.544052768 +0200
 @@ -5,7 +5,7 @@
  use Test::Simple tests => 1;
  
@@ -3649,9 +4097,9 @@ diff -purd a/xt/gh70-asan.t b/xt/gh70-asan.t
  J->new;
  
  package main;
-diff -purd a/xt/leaktrace.t b/xt/leaktrace.t
+diff -purdN a/xt/leaktrace.t b/xt/leaktrace.t
 --- a/xt/leaktrace.t	2023-02-21 17:20:32.000000000 +0100
-+++ b/xt/leaktrace.t	2023-09-26 18:59:07.652080958 +0200
++++ b/xt/leaktrace.t	2023-09-27 10:22:04.544052768 +0200
 @@ -7,10 +7,10 @@ use constant HAS_LEAKTRACE => eval{ requ
  use Test::More HAS_LEAKTRACE ? (tests => 4) : (skip_all => 'require Test::LeakTrace');
  use Test::LeakTrace;
