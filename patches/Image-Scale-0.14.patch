@@ -1,0 +1,40 @@
+diff -purd a/src/image.c b/src/image.c
+--- a/src/image.c	2017-11-28 03:37:18.000000000 +0100
++++ b/src/image.c	2023-11-16 16:18:29.902983617 +0100
+@@ -45,7 +45,7 @@ image_init(HV *self, image *im)
+   if (my_hv_exists(self, "file")) {
+     // Input from file
+     SV *path = *(my_hv_fetch(self, "file"));
+-    file = SvPVX(path);
++    file = SvPV_nolen(path);
+     im->fh = IoIFP(sv_2io(*(my_hv_fetch(self, "_fh"))));
+     im->path = newSVsv(path);
+   }
+diff -purd a/t/stringify.t b/t/stringify.t
+--- a/t/stringify.t	2017-11-28 03:37:56.000000000 +0100
++++ b/t/stringify.t	2023-11-16 16:21:55.709201943 +0100
+@@ -25,13 +25,13 @@ SKIP:
+ {
+     skip "Image::Scale not built with libjpeg support", 2 unless Image::Scale->jpeg_version;
+ 
+-    my $im = Image::Scale->new( Path::Tiny::path( _f("jpg/rgb.jpg") ) );
++    my $im = Image::Scale->new( Path::Tiny::path( _f("jpg/rgb.jpg") )->stringify );
+     is( $im->width, 313, "Path::Tiny stringify in new() ok" );
+ 
+     $im->resize_gd( { width => 50, height => 50 } );
+ 
+     my $outjpg = _tmp("resized.jpg");
+-    $im->save_jpeg( Path::Tiny::path($outjpg) );
++    $im->save_jpeg( Path::Tiny::path($outjpg)->stringify );
+     ok( -e $outjpg, 'Path::Tiny stringify in save_jpeg() ok' );
+ }
+ 
+@@ -44,7 +44,7 @@ SKIP:
+     $im->resize_gd( { width => 50, height => 50 } );
+ 
+     my $outpng = _tmp("resized.png");
+-    $im->save_png( Path::Tiny::path($outpng) );
++    $im->save_png( Path::Tiny::path($outpng)->stringify );
+     ok( -e $outpng, 'Path::Tiny stringify in save_png() ok' );
+ }
+ 

@@ -1,0 +1,6 @@
+---
+comment: "Path::Tiny issues: https://rt.cpan.org/Ticket/Display.html?id=119094"
+match:
+  distribution: '^AGRUNDMA/Image-Scale'
+  patches:
+    - "../../patches/Image-Scale-0.14.patch"
