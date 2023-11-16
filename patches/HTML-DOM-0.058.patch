@@ -1,6 +1,634 @@
---- a/t/html-dom.t.orig	2018-10-21 12:42:03.151861348 -0400
-+++ b/t/html-dom.t	2018-10-21 12:51:42.646258898 -0400
-@@ -64,20 +64,17 @@
+diff -purd a/Changes b/Changes
+--- a/Changes	2018-02-02 21:57:09.000000000 +0100
++++ b/Changes	2023-11-16 16:05:20.154471156 +0100
+@@ -747,7 +747,7 @@ Revision history for HTML::DOM
+           HTML::DOM::Interface.
+         * HTML::DOM::Element::Input's click method now returns an
+           empty list.
+-        * HTML::DOM's event_attr_handler is now actually useful. (It
++        * HTML::DOM::s event_attr_handler is now actually useful. (It
+           used to be ignored most of the time.)
+ 
+ 0.008   5 October, 2007
+@@ -755,7 +755,7 @@ Revision history for HTML::DOM
+         * Added type and value methods to HTML::DOM::Element::Button
+         * Added the charset, coords and tabIndex methods to 
+           HTML::DOM::Element::A.
+-        * HTML::DOM's createElement method now throws an 
++        * HTML::DOM::s createElement method now throws an 
+           HTML::DOM::Exception.
+ 
+ 0.007   29 September, 2007
+diff -purd a/lib/HTML/DOM/Element/Form.pm b/lib/HTML/DOM/Element/Form.pm
+--- a/lib/HTML/DOM/Element/Form.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/Element/Form.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -284,7 +284,7 @@ my $encodings_re;
+ sub _encoding_ok {
+ 	my ($enc,$xwfu) =@ _;
+ 	$enc =~ s/^(?:x-?)?mac-?/mac/i;
+-	($enc) x (Encode'resolve_alias($enc)||return)
++	($enc) x (Encode::resolve_alias($enc)||return)
+ 		=~ ($xwfu ? $ascii_encodings_re : $encodings_re ||=qr/^${\
+ 			join'|',map quotemeta,
+ 				encodings Encode 'Byte'
+@@ -319,7 +319,7 @@ sub _apply_charset {
+ 		# chars with ?
+ 		my $fallback;
+ 		$charset = $$charsets[0]||(++$fallback,'utf8');
+-		@ret = map ref$_ ? $_ : Encode'encode($charset,$_),
++		@ret = map ref$_ ? $_ : Encode::encode($charset,$_),
+ 			@$apply_to;
+ 		$fallback and $charset = 'utf-8';
+ 	}
+@@ -383,7 +383,7 @@ sub make_request
+                 (my $charset, $val) = _apply_charset \@charsets, [$val];
+ #use DDS; Dump [$origval,$val, ];
+                 my $enc = $name;
+-                $enc = Encode'encode('MIME-B', $enc) if $enc =~ /[^ -~]/;
++                $enc = Encode::encode('MIME-B', $enc) if $enc =~ /[^ -~]/;
+                 push @new_form, $enc,
+                     ref $$val[0] ? $$val[0] : [(undef)x2,
+                         Content_Type => "text/plain; charset=\"$charset\"",
+@@ -673,7 +673,7 @@ our @ISA = 'HTML::DOM::Element';
+ use overload fallback=>1, '@{}' => sub { shift->options };
+ 	# ~~~ Don't I need %{} as well?
+ 
+-use Scalar'Util 'weaken';
++use Scalar::Util 'weaken';
+ 
+ sub type      { 'select-' . qw/one multiple/[!!shift->attr('multiple')] }
+ sub selectedIndex   {
+diff -purd a/lib/HTML/DOM/Element/Table.pm b/lib/HTML/DOM/Element/Table.pm
+--- a/lib/HTML/DOM/Element/Table.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/Element/Table.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -18,7 +18,7 @@ sub caption {
+ 	if(@_) {
+ 		my $new = shift;
+ 		my $tag = (eval{$new->tag}||'');
+-		$tag eq 'caption' or die new HTML'DOM'Exception
++		$tag eq 'caption' or die new HTML::DOM::Exception
+ 			HIERARCHY_REQUEST_ERR,
+ 			$tag ? "A $tag element cannot be a table caption"
+ 			     : "Not a valid table caption";
+@@ -39,7 +39,7 @@ sub tHead {
+ 		    my $new = shift;
+ 		    my $new_tag = (eval{$new->tag}||'');
+ 		    $new_tag eq 'thead' or die
+-		      new HTML'DOM'Exception
++		      new HTML::DOM::Exception
+ 		        HIERARCHY_REQUEST_ERR,
+ 		        $tag
+ 		        ? "A $new_tag element cannot be a table header"
+@@ -64,7 +64,7 @@ sub tFoot {
+ 		    my $new = shift;
+ 		    my $new_tag = (eval{$new->tag}||'');
+ 		    $new_tag eq 'tfoot' or die
+-		      new HTML'DOM'Exception
++		      new HTML::DOM::Exception
+ 		        HIERARCHY_REQUEST_ERR,
+ 		        $tag
+ 		        ? "A $new_tag element cannot be a table footer"
+diff -purd a/lib/HTML/DOM/Element.pm b/lib/HTML/DOM/Element.pm
+--- a/lib/HTML/DOM/Element.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/Element.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -6,7 +6,7 @@ use warnings;
+ use HTML::DOM::Exception qw 'INVALID_CHARACTER_ERR 
+                              INUSE_ATTRIBUTE_ERR NOT_FOUND_ERR SYNTAX_ERR';
+ use HTML::DOM::Node 'ELEMENT_NODE';
+-use HTML'Entities;
++use HTML::Entities;
+ use Scalar::Util qw'refaddr blessed weaken';
+ 
+ require HTML::DOM::Attr;
+@@ -126,7 +126,7 @@ HTMLElement DOM interfaces.
+ 
+ =head2 Constructor
+ 
+-You should normally use HTML::DOM's C<createElement> method. This is listed
++You should normally use HTML::DOM::s C<createElement> method. This is listed
+ here only for completeness:
+ 
+   $elem = new HTML::DOM::Element $tag_name;
+@@ -141,7 +141,7 @@ sub new {
+ 
+ 	# Hack to make parsing comments work
+ 	$tagname eq '~comment'
+-	 and require HTML'DOM'Comment, return new HTML'DOM'Comment;
++	 and require HTML::DOM::Comment, return new HTML::DOM::Comment;
+ 
+ 	# ~~~ The DOM spec does not specify which characters are invaleid.
+ 	#     I think I need to check the HTML spec. For now, I'm simply
+@@ -154,7 +154,7 @@ sub new {
+ 		# require can sometimes fail if it’s part of a tainted
+ 		# statement. That’s why it’s in a do block.
+ 		$tagname =~ /^html\z/i
+-		 and do { require HTML'DOM }; # paranoia
++		 and do { require HTML::DOM }; # paranoia
+ 	};
+ 	$@ or return $ret;
+ 	die HTML::DOM::Exception->new( INVALID_CHARACTER_ERR, $@);
+@@ -222,7 +222,7 @@ And there is also the following non-DOM
+ 
+ This contains the offset (in characters) within the HTML source of the
+ element's first child node, if it is a text node. This is set (indirectly)
+-by HTML::DOM's C<write> method. You can also set it yourself.
++by HTML::DOM::s C<write> method. You can also set it yourself.
+ 
+ =back
+ 
+@@ -349,12 +349,12 @@ sub setAttribute {
+ 		$old ne $str_val
+ 		 and $self->trigger_event('DOMAttrModified',
+ 			auto_viv => sub {
+-				require HTML'DOM'Event'Mutation;
++				require HTML::DOM::Event::Mutation;
+ 				attr_name => $name,
+ 				attr_change_type =>
+ 				  defined $old
+-				  ? &HTML'DOM'Event'Mutation'MODIFICATION
+-				  : &HTML'DOM'Event'Mutation'ADDITION,
++				  ? &HTML::DOM::Event::Mutation::MODIFICATION
++				  : &HTML::DOM::Event::Mutation::ADDITION,
+ 				prev_value => $old,
+ 				new_value => $val,
+ 				rel_node => $self->getAttributeNode($name),
+@@ -629,7 +629,7 @@ sub click { shift->trigger_event('click'
+ 
+ # used by innerHTML and insertAdjacentHTML
+ sub _html_fragment_parser {
+-		require HTML'DOM; # paranoia
++		require HTML::DOM; # paranoia
+ 		(my $tb = new HTML::DOM::Element::HTML:: no_magic_forms=>1)
+ 		  ->_set_ownerDocument(shift->ownerDocument);
+ 		$tb->parse(shift);
+@@ -885,7 +885,7 @@ sub trigger_event {
+   $args{auto_viv} and %args = &{$args{auto_viv}}, @_ = ($event, %args);
+   $args{attr_name} eq 'href' and _reset_style_sheet($elem);
+  }
+- SUPER'trigger_event $elem @_;
++ SUPER::trigger_event $elem @_;
+ }
+ 
+ sub _reset_style_sheet {
+@@ -903,8 +903,8 @@ sub _reset_style_sheet {
+  my ($css_code, %args)
+   = $fetcher->($url);
+  return unless defined $css_code;
+- require CSS'DOM;
+- VERSION CSS'DOM 0.03;
++ require CSS::DOM;
++ VERSION CSS::DOM 0.03;
+  my $hint
+   = $doc->charset || 'iso-8859-1';
+               # default HTML charset
+@@ -913,7 +913,7 @@ sub _reset_style_sheet {
+   #  sure for each style sheet, but
+   #  what if the charset changes?
+   # ~~~ Is that even possible?
+-  CSS'DOM'parse(
++  CSS::DOM::parse(
+    $css_code,
+    url_fetcher => sub {
+     my @ret = $fetcher->(shift);
+diff -purd a/lib/HTML/DOM/Event.pm b/lib/HTML/DOM/Event.pm
+--- a/lib/HTML/DOM/Event.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/Event.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -271,7 +271,7 @@ sub defaults {
+ 		: (''=>propagates_up=>1,cancellable=>1);
+ }
+ 
+-# ($event_category, @args) = HTML'DOM'Event'defaults foo;
++# ($event_category, @args) = HTML::DOM::Event::defaults foo;
+ 
+ 1;
+ __END__
+diff -purd a/lib/HTML/DOM/EventTarget.pm b/lib/HTML/DOM/EventTarget.pm
+--- a/lib/HTML/DOM/EventTarget.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/EventTarget.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -223,7 +223,7 @@ sub get_event_listeners { # uses undersc
+ 
+ =item dispatchEvent($event_object)
+ 
+-$event_object is an object returned by HTML::DOM's C<createEvent> method,
++$event_object is an object returned by HTML::DOM::s C<createEvent> method,
+ or any object that implements the interface documented in 
+ L<HTML::DOM::Event>.
+ 
+@@ -445,7 +445,7 @@ sub trigger_event { # non-DOM method
+ 		# For efficiency’s sake, we skip creating the event object
+ 		# here, and have _dispatch_event create the object on
+ 		# demand, using the code ref that we pass to it.
+-		my ($cat, @init_args) = HTML'DOM'Event'defaults($event);
++		my ($cat, @init_args) = HTML::DOM::Event::defaults($event);
+ 		unshift @init_args, type => $event;
+ 		if(my $rv = _dispatch_event(
+ 			$target, 0, $cat, $args{auto_viv},
+@@ -457,7 +457,7 @@ sub trigger_event { # non-DOM method
+ 				 || return;
+ 			unless (ref $rv) {
+ 				($rv =
+-				  HTML'DOM'Event'create_event($cat)
++				  HTML::DOM::Event::create_event($cat)
+ 				)->init(my @args =
+ 					@init_args, &{$args{auto_viv}}
+ 				);
+@@ -472,9 +472,9 @@ sub trigger_event { # non-DOM method
+ 	? $type =  $event->type 
+ 	: do {
+ 		$type = $event;
+-		$event = HTML'DOM'Event'create_event((
++		$event = HTML::DOM::Event::create_event((
+ 				my (undef, @init_args) =
+-					HTML'DOM'Event'defaults($type)
++					HTML::DOM::Event::defaults($type)
+ 			)[0]);
+ 		$event->init(
+ 			type=>$type,
+diff -purd a/lib/HTML/DOM/Implementation.pm b/lib/HTML/DOM/Implementation.pm
+--- a/lib/HTML/DOM/Implementation.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/Implementation.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -39,7 +39,7 @@ __END__
+ 
+ =head1 NAME
+ 
+-HTML::DOM::Implementation - HTML::DOM's 'DOMImplementation' object
++HTML::DOM::Implementation - HTML::DOM::s 'DOMImplementation' object
+ 
+ =head1 VERSION
+ 
+diff -purd a/lib/HTML/DOM/Interface.pm b/lib/HTML/DOM/Interface.pm
+--- a/lib/HTML/DOM/Interface.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/Interface.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -4,12 +4,12 @@ use Exporter 5.57 'import';
+ our $VERSION = '0.058';
+ 
+ # for constants
+-require HTML'DOM'Event'Mutation;
+-require HTML'DOM'Node;
++require HTML::DOM::Event::Mutation;
++require HTML::DOM::Node;
+ 
+ =head1 NAME
+ 
+-HTML::DOM::Interface - A list of HTML::DOM's interface members in machine-readable format
++HTML::DOM::Interface - A list of HTML::DOM::s interface members in machine-readable format
+ 
+ =head1 VERSION
+ 
+diff -purd a/lib/HTML/DOM/NamedNodeMap.pm b/lib/HTML/DOM/NamedNodeMap.pm
+--- a/lib/HTML/DOM/NamedNodeMap.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/NamedNodeMap.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -85,7 +85,7 @@ our @ISA = "Tie::Array";
+ 
+ sub TIEARRAY {
+     require Tie::Array;
+-    goto &HTML::DOM'NamedNodeMap'new;
++    goto &HTML::DOM::NamedNodeMap::new;
+ }
+ 
+ *FETCH = *HTML::DOM::NamedNodeMap::item;
+@@ -98,10 +98,10 @@ our @ISA = "Tie::Hash";
+ 
+ sub TIEHASH {
+     require Tie::Hash;
+-    goto &HTML::DOM'NamedNodeMap'new;
++    goto &HTML::DOM::NamedNodeMap::new;
+ }
+-*STORE = *HTML'DOM'NamedNodeMap'setNamedItem;
+-*FETCH = *HTML'DOM'NamedNodeMap'getNamedItem;
++*STORE = *HTML::DOM::NamedNodeMap::setNamedItem;
++*FETCH = *HTML::DOM::NamedNodeMap::getNamedItem;
+ 
+ sub FIRSTKEY {
+     # reset iterator; I don’t *think* any other code uses it.
+diff -purd a/lib/HTML/DOM/View.pm b/lib/HTML/DOM/View.pm
+--- a/lib/HTML/DOM/View.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM/View.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -24,7 +24,7 @@ sub getComputedStyle {
+ 	my $doc = $view->document;
+ 
+ 	require CSS::DOM; CSS::DOM->VERSION(.06);
+-	return CSS::DOM'compute_style(
++	return CSS::DOM::compute_style(
+ 		#medium => ...	
+ 		#height => $view->innerHeight;
+ 		#width => $view->innerWidth;
+diff -purd a/lib/HTML/DOM.pm b/lib/HTML/DOM.pm
+--- a/lib/HTML/DOM.pm	2018-02-02 21:57:30.000000000 +0100
++++ b/lib/HTML/DOM.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -221,7 +221,7 @@ C<response>.
+ 				if(
+ 				 $tag eq 'link'
+ 				) {
+-				 HTML'DOM'Element'Link'_reset_style_sheet(
++				 HTML::DOM::Element::Link::_reset_style_sheet(
+ 				  $elem
+ 				 );
+ 				}
+@@ -885,7 +885,7 @@ sub createEntityReference {
+ 
+ #sub createCSSStyleSheet {
+ # shift;
+-# require CSS'DOM;
++# require CSS::DOM;
+ # ~~~
+ #}
+ 
+@@ -1252,7 +1252,7 @@ sub getElementsByName {
+ 
+ sub getElementsByClassName {
+ 	splice @_, 2, @_, 1; # Remove extra elements; add a true third elem
+-	goto &HTML'DOM'Element'_getElementsByClassName;
++	goto &HTML::DOM::Element::_getElementsByClassName;
+ }
+ 
+ # ---------- DocumentEvent interface -------------- #
+@@ -1271,8 +1271,8 @@ You can omit the C<$category> to create
+ =cut
+ 
+ sub createEvent {
+-	require HTML'DOM'Event;
+-	HTML'DOM'Event'create_event($_[1]||'');
++	require HTML::DOM::Event;
++	HTML::DOM::Event::create_event($_[1]||'');
+ }
+ 
+ # ---------- DocumentView interface -------------- #
+@@ -1340,7 +1340,7 @@ sub innerHTML  {
+ 	my $old;
+ 	$old = join '' , $self->{_HTML_DOM_doctype}||'',
+ 		map
+-		 HTML'DOM'Element'_html_element_adds_newline
++		 HTML::DOM::Element::_html_element_adds_newline
+ 		  ? substr((
+ 		     as_HTML $_ (undef)x2,{}
+ 		    ), 0, -1)
+@@ -1413,8 +1413,8 @@ server doesn’t say, it’s no use pret
+ sub lastModified {
+ 	my $time = ($_[0]{_HTML_DOM_response} || return '')->last_modified
+ 	 or return '';
+-	require Date'Format;
+-	Date'Format'time2str("%d/%m/%Y %X", $time);
++	require Date::Format;
++	Date::Format::time2str("%d/%m/%Y %X", $time);
+ }
+ 
+ 
+@@ -1725,7 +1725,7 @@ __END__
+ 
+ =head1 CLASSES AND DOM INTERFACES
+ 
+-Here are the inheritance hierarchy of HTML::DOM's various classes and the
++Here are the inheritance hierarchy of HTML::DOM::s various classes and the
+ DOM interfaces those classes implement. The classes in the left column all
+ begin with 'HTML::DOM::', which is omitted for brevity, except for
+ HTML::DOM itself, which is listed with its full name. Items in brackets
+diff -purd a/Makefile.PL b/Makefile.PL
+--- a/Makefile.PL	2012-03-08 07:44:15.000000000 +0100
++++ b/Makefile.PL	2023-11-16 16:05:20.158471199 +0100
+@@ -10,11 +10,11 @@ use ExtUtils::MakeMaker;
+ # Unfortunately, previous versions of the JS plugin wouldn’t compile with-
+ # out WWW::Scripter loaded already. So this is a mess.
+ %broken_deps = (
+- WWW'Scripter                   => { breaks => 0.016, use => 0.017 },
+- WWW'Scripter'Plugin'JavaScript => { breaks => 0.002, use => 0.003 }
++ WWW::Scripter                   => { breaks => 0.016, use => 0.017 },
++ WWW::Scripter::Plugin::JavaScript => { breaks => 0.002, use => 0.003 }
+ );
+ while(my($mod,$vers) = each %broken_deps) {
+- if(eval{require WWW'Scripter}
++ if(eval{require WWW::Scripter}
+     and eval"require $mod" and !eval{VERSION $mod $$vers{use}}) {
+   push @broken_deps, $mod;
+  }
+@@ -52,7 +52,7 @@ my %prq = (
+         'CSS::DOM::Style'          => 0.05, # modification_handler
+                                             # and ::Style::parse’s
+         'CSS::DOM::StyleSheetList' => 0,    # stringification
+-         Date'Format               => 0,
++         Date::Format               => 0,
+          Exporter                  => 5.57, # for use Exporter 'import'
+ 	'HTML::Tagset'             => 0,
+ 	'HTML::Encoding'           => 0,
+@@ -62,24 +62,24 @@ my %prq = (
+                                             ? 5.811 : 0,
+          HTTP::Request             => 0,
+          HTTP::Request::Common     => 0,
+-         HTTP'Headers              => 1.59, # comes with LWP 5.79; for the
++         HTTP::Headers              => 1.59, # comes with LWP 5.79; for the
+         'HTTP::Headers::Util'      => 0,    # header_field_names method
+          overload                  => 0,
+         'Scalar::Util'             => 1.09, # refaddr
+          strict                    => 0,
+          eval { require Hash::Util::FieldHash } ? () : (
+-          Tie'RefHash'Weak         =>  .08, # fieldhash
++          Tie::RefHash::Weak         =>  .08, # fieldhash
+          ),
+          URI                       => 0,
+          warnings                  => 0,
+ # used only in the tests:
+-         CSS'DOM                   => 0.07, # !important ua rules
+-         HTTP'Response             => 0,
++         CSS::DOM                   => 0.07, # !important ua rules
++         HTTP::Response             => 0,
+          Scalar::Util              => 1.14, # refaddr with ties
+         'Test::More'               => 0,
+ 	 utf8                      => 0,
+ );
+-$prq{HTTP'Message} = 1.34 unless $prq{HTTP'Message}; # array ref headers
++$prq{HTTP::Message} = 1.34 unless $prq{HTTP::Message}; # array ref headers
+ 
+ WriteMakefile(
+     NAME                => 'HTML::DOM',
+diff -purd a/t/char-data.t b/t/char-data.t
+--- a/t/char-data.t	2008-10-18 00:22:30.000000000 +0200
++++ b/t/char-data.t	2023-11-16 16:05:20.158471199 +0100
+@@ -9,7 +9,7 @@ use strict; use warnings; use lib 't';
+ use strict; use warnings;
+ our $tests;
+ BEGIN { ++$INC{'tests.pm'} }
+-sub tests'VERSION { $tests += pop };
++sub tests::VERSION { $tests += pop };
+ use Test::More;
+ plan tests => $tests;
+ 
+diff -purd a/t/css.t b/t/css.t
+--- a/t/css.t	2009-11-21 15:08:18.000000000 +0100
++++ b/t/css.t	2023-11-16 16:05:20.158471199 +0100
+@@ -3,7 +3,7 @@
+ use strict; use warnings; use lib 't';
+ our $tests;
+ BEGIN { ++$INC{'tests.pm'} }
+-sub tests'VERSION { $tests += pop };
++sub tests::VERSION { $tests += pop };
+ use Test::More;
+ plan tests => $tests;
+ 
+@@ -183,7 +183,7 @@ use tests 17; # DocumentStyle
+ 	is @$list, 2,
+ 	    'setAttribute adds the style sheet to the list';
+ 	SKIP: { skip 'What is the correct behaviour?' ,1;
+-	isn't refaddr $list->[1], refaddr $list[1],
++	isnt refaddr $list->[1], refaddr $list[1],
+ 	    'creating it from scratch';
+ 	}
+ 
+@@ -203,7 +203,7 @@ use tests 17; # DocumentStyle
+ 	is @$list, 2,
+ 	    'setAttributeNode adds the style sheet to the list ...';
+ 	SKIP: { skip 'What is the correct behaviour?' ,1;
+-	isn't refaddr $list->[1], refaddr $list[1],
++	isnt refaddr $list->[1], refaddr $list[1],
+ 	    '... creating it from scratch';
+ 	}
+ 	
+@@ -220,7 +220,7 @@ use tests 23; # ViewCSS
+ 
+ {
+ 	package TestView;
+-	require HTML'DOM'View;
++	require HTML::DOM::View;
+ 	our @ISA = HTML::DOM::View::;
+ 	sub new { bless [], shift }
+ 	sub ua_style_sheet { return $_[0][0] }
+@@ -231,13 +231,13 @@ use tests 23; # ViewCSS
+ 	(my $view = new TestView) -> document ( $doc );
+ 
+ 	require CSS::DOM;
+-	VERSION CSS'DOM 0.07;
+-	$view->[0] = CSS'DOM'parse(' /* UA style sheet */
++	VERSION CSS::DOM 0.07;
++	$view->[0] = CSS::DOM::parse(' /* UA style sheet */
+ 		#twelve { font-size: 13px }
+ 		#thirteen { font-size: 14px }
+ 		#fourteen { font-size: 15px
+ 	');
+-	$view->[1] = CSS'DOM'parse(' /* User style sheet */
++	$view->[1] = CSS::DOM::parse(' /* User style sheet */
+ 		#twelve { font-size: 3px }
+ 		#thirteen { font-size: 4px }
+ 	');
+@@ -323,11 +323,11 @@ _END_
+ 
+ 	
+ 
+-	$view->[0]=CSS'DOM'parse(' /* UA style sheet */
++	$view->[0]=CSS::DOM::parse(' /* UA style sheet */
+ 		p { color: yellow ! important; }
+ 		span { font-size: 38px !important }
+ 	');
+-	$view->[1]=CSS'DOM'parse(' /* User style sheet */
++	$view->[1]=CSS::DOM::parse(' /* User style sheet */
+ 		a { font-size: 14px ! important }
+ 	');
+ 	$doc->write(<<'_TEMDOBEDXK>N');
+diff -purd a/t/dustbin-man.t b/t/dustbin-man.t
+--- a/t/dustbin-man.t	2008-10-18 03:31:09.000000000 +0200
++++ b/t/dustbin-man.t	2023-11-16 16:05:20.158471199 +0100
+@@ -3,7 +3,7 @@
+ use strict; use warnings; use lib 't';
+ our $tests;
+ BEGIN { ++$INC{'tests.pm'} }
+-sub tests'VERSION { $tests += pop };
++sub tests::VERSION { $tests += pop };
+ use Test::More;
+ plan tests => $tests;
+ 
+diff -purd a/t/event-target.t b/t/event-target.t
+--- a/t/event-target.t	2009-10-25 05:24:09.000000000 +0100
++++ b/t/event-target.t	2023-11-16 16:05:20.158471199 +0100
+@@ -392,7 +392,7 @@ use tests 1; # error_handler
+ {
+ 	no warnings 'once';
+ 	my $e;
+-	local *MyEventTarget'error_handler = sub{ sub{ $e = $@ }};
++	local *MyEventTarget::error_handler = sub{ sub{ $e = $@ }};
+ 	$grandchild->addEventListener(foo => sub { die "67\n" });
+ 	$grandchild->trigger_event('foo');
+ 	is $e, "67\n", 'error_handler gets called';
+@@ -404,28 +404,28 @@ use tests 7;  # event_listeners_enabled
+ {
+ 	no warnings qw 'redefine once';
+ 	my $e;
+-	local *MyEventTarget'event_listeners_enabled = sub{ 1 };
++	local *MyEventTarget::event_listeners_enabled = sub{ 1 };
+ 	$grandchild->addEventListener(foo => sub { ++$e });
+ 	$grandchild->trigger_event('foo');
+ 	is $e, 1,
+ 	  'event handlers run when event_listeners_enabled returns true';
+-	local *MyEventTarget'event_listeners_enabled = sub{ 0 };
++	local *MyEventTarget::event_listeners_enabled = sub{ 0 };
+ 	$grandchild->trigger_event('foo');
+ 	is $e, 1,
+ 	  'event handlers don\'t run if event_listeners_enabled is false';
+-	local *MyEventTarget'event_listeners_enabled = sub{ 1 };
+-	local *MyDoc'event_listeners_enabled = sub { 0 };
+-	local *MyEventTarget'ownerDocument = sub { bless[], 'MyDoc' };
++	local *MyEventTarget::event_listeners_enabled = sub{ 1 };
++	local *MyDoc::event_listeners_enabled = sub { 0 };
++	local *MyEventTarget::ownerDocument = sub { bless[], 'MyDoc' };
+ 	$grandchild->trigger_event('foo');
+ 	is $e, 2, 'An event_listeners_enabled method on the event';
+-	local *MyEventTarget'event_listeners_enabled = sub{ 0 };
+-	local *MyDoc'event_listeners_enabled = sub { 1 };
++	local *MyEventTarget::event_listeners_enabled = sub{ 0 };
++	local *MyDoc::event_listeners_enabled = sub { 1 };
+ 	$grandchild->trigger_event('foo');
+ 	is $e, 2, ' target prevents ownerDocument from being checked.';
+-	undef *MyEventTarget'event_listeners_enabled;
++	undef *MyEventTarget::event_listeners_enabled;
+ 	$grandchild->trigger_event('foo');
+ 	is $e, 3, 'fallback to event_listeners_enabled';
+-	local *MyDoc'event_listeners_enabled = sub { 0 };
++	local *MyDoc::event_listeners_enabled = sub { 0 };
+ 	$grandchild->trigger_event('foo');
+ 	is $e, 3, '  on the ownerDocument';
+ 
+diff -purd a/t/form-element.t b/t/form-element.t
+--- a/t/form-element.t	2012-03-25 07:55:30.000000000 +0200
++++ b/t/form-element.t	2023-11-16 16:05:20.158471199 +0100
+@@ -21,7 +21,7 @@
+ use strict; use warnings; use lib 't';
+ our $tests;
+ BEGIN { ++$INC{'tests.pm'} }
+-sub tests'VERSION { $tests += pop };
++sub tests::VERSION { $tests += pop };
+ use Test::More;
+ plan tests => $tests;
+ use Scalar::Util 'refaddr';
+diff -purd a/t/html-document.t b/t/html-document.t
+--- a/t/html-document.t	2016-02-28 22:03:39.000000000 +0100
++++ b/t/html-document.t	2023-11-16 16:05:20.158471199 +0100
+@@ -275,12 +275,12 @@ use tests 20; # open, close, unbuffaloed
+ 	eval{$doc->close;};
+ 	is $@, '', 'redudant close() throws no errors';
+ 
+-	my $p_handler = sub { ++ $p's };
++	my $p_handler = sub { ++ $p::s };
+ 	$doc->elem_handler(p => $p_handler);
+ 	$doc->open; # all the way up to 0.009, this would clobber the
+ 	            # element handler
+ 	$doc->write('<p>oenheuo<p>oenuth'); $doc->close;
+-	is $p's, 2, 'Our clobbered element handler bug is gone';
++	is $p::s, 2, 'Our clobbered element handler bug is gone';
+ 	
+ 	# Bug in 0.011 (and probably much earlier): close is too good
+ 	# about suppressing errors and eliminates all of them, even when
+diff -purd a/t/html-dom.t b/t/html-dom.t
+--- a/t/html-dom.t	2016-07-04 06:29:49.000000000 +0200
++++ b/t/html-dom.t	2023-11-16 16:05:20.158471199 +0100
+@@ -29,8 +29,8 @@ isa_ok $doc, 'HTML::DOM';
+  require HTTP::Response;
+  my $res = new HTTP::Response;
+  my $doc = new HTML::DOM response => $res, weaken_response => 1;
+- require Scalar'Util;
+- Scalar'Util'weaken $res;
++ require Scalar::Util;
++ Scalar::Util::weaken $res;
+  is $res, undef, 'weaken_response';
+ }
+ 
+@@ -64,20 +64,17 @@ $doc->write('<p>Para ' . ($doc->body->ch
  $doc->close;
  
  {
@@ -25,3 +653,106 @@
  {
   my $script = $doc->createElement('script');
   $script->appendChild($doc->createTextNode('$doc->title("scred")'));
+@@ -303,8 +300,8 @@ is $doc->charset, 'utf-16be', 'get chars
+ 	is $doc->event_parent($thing), undef,
+ 		'event parent returns undef when setting the first time';;
+ 	is $doc->event_parent, $thing,, 'and setting it actually worked';
+-	require Scalar'Util;
+-	Scalar'Util'weaken($thing);
++	require Scalar::Util;
++	Scalar::Util::weaken($thing);
+ 	is $thing, undef, 'event_parent holds a weak reference';
+ }
+ 
+@@ -320,8 +317,8 @@ is $doc->charset, 'utf-16be', 'get chars
+  $doc->find('base')->getAttributeNode('href'); # autoviv the attr node
+  ok !ref $doc->base, 'base returns a plain scalar';
+ 
+- require HTTP'Response;
+- $doc = new HTML::DOM response => new HTTP'Response 200, OK => [
++ require HTTP::Response;
++ $doc = new HTML::DOM response => new HTTP::Response 200, OK => [
+   content_type => 'text/html',
+   content_base => 'http://websms.rogers.page.ca/skins/rogers-oct2009/',
+  ], '';
+@@ -340,9 +337,9 @@ is $doc->charset, 'utf-16be', 'get chars
+  $doc  = new HTML::DOM url => "data:text/html,blahblahblah";
+  is $doc->base, "data:text/html,blahblahblah", 'base with data URL';
+  # This one was fixed in 0.057:
+- my $r = new HTTP'Response 200, OK => [content_type=>'text/html'], '';
+- require HTTP'Request;
+- request $r new HTTP'Request GET => 'data:text/html,blooblah';
++ my $r = new HTTP::Response 200, OK => [content_type=>'text/html'], '';
++ require HTTP::Request;
++ request $r new HTTP::Request GET => 'data:text/html,blooblah';
+  $doc = new HTML::DOM response => $r;
+  is $doc->base, 'data:text/html,blooblah';
+ }
+diff -purd a/t/html-form.t b/t/html-form.t
+--- a/t/html-form.t	2018-02-02 19:17:39.000000000 +0100
++++ b/t/html-form.t	2023-11-16 16:05:20.158471199 +0100
+@@ -659,12 +659,12 @@ $doc->write("<form><button name=b value=
+                    <button type=reset name=c value=d>
+                    <button type=button name=e value=f>
+             </form>");
+-is $doc->getElementsByTagName('button')->[1]->main'click->as_string,
++is $doc->getElementsByTagName('button')->[1]->main::click->as_string,
+    "GET http://example.com?b=w\n\n", '<button> elements';
+ is +($doc->forms)[0]->main::click->as_string,
+    "GET http://example.com?b=v\n\n",
+    'form->click supports <button>s';
+-is $doc->getElementsByTagName('button')->[2]->main'click->as_string,
++is $doc->getElementsByTagName('button')->[2]->main::click->as_string,
+    "GET http://example.com?btnAccept=\n\n", '<button> element with no val';
+ 
+ # -------- Bugs related to HTML::DOM’s HTML::Form imitation ---------- #
+diff -purd a/t/tables.t b/t/tables.t
+--- a/t/tables.t	2010-06-13 21:20:37.000000000 +0200
++++ b/t/tables.t	2023-11-16 16:05:20.158471199 +0100
+@@ -8,7 +8,7 @@
+ use strict; use warnings; use lib 't';
+ our $tests;
+ BEGIN { ++$INC{'tests.pm'} }
+-sub tests'VERSION { $tests += pop };
++sub tests::VERSION { $tests += pop };
+ use Test::More;
+ plan tests => $tests;
+ 
+diff -purd a/t/tests.pm b/t/tests.pm
+--- a/t/tests.pm	2011-12-30 01:47:18.000000000 +0100
++++ b/t/tests.pm	2023-11-16 16:05:20.158471199 +0100
+@@ -1,5 +1,5 @@
+ use Test::More;
+-sub tests'VERSION { $tests'tests += pop };
+-sub tests'import { shift; $tests'tests += pop||return }
+-CHECK{plan tests => $tests'tests;}
+-$$
+\ No newline at end of file
++sub tests::VERSION { $tests::tests += pop };
++sub tests::import { shift; $tests::tests += pop||return }
++CHECK{plan tests => $tests::tests;}
++$$
+diff -purd a/t/tree-builder.t b/t/tree-builder.t
+--- a/t/tree-builder.t	2012-03-25 07:57:41.000000000 +0200
++++ b/t/tree-builder.t	2023-11-16 16:05:20.158471199 +0100
+@@ -3,7 +3,7 @@
+ use strict; use warnings; use lib 't';
+ our $tests;
+ BEGIN { ++$INC{'tests.pm'} }
+-sub tests'VERSION { $tests += pop };
++sub tests::VERSION { $tests += pop };
+ use Test::More;
+ plan tests => $tests;
+ 
+diff -purd a/t/views.t b/t/views.t
+--- a/t/views.t	2008-09-17 03:14:41.000000000 +0200
++++ b/t/views.t	2023-11-16 16:05:20.158471199 +0100
+@@ -3,7 +3,7 @@
+ use strict; use warnings; use lib 't';
+ our $tests;
+ BEGIN { ++$INC{'tests.pm'} }
+-sub tests'VERSION { $tests += pop };
++sub tests::VERSION { $tests += pop };
+ use Test::More;
+ plan tests => $tests;
+ 
