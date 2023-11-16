@@ -1,0 +1,6 @@
+---
+comment: "Package sep ' is deprecated"
+match:
+  distribution: '^SPROUT/CSS-DOM'
+  patches:
+    - "../../patches/CSS-DOM-0.17.patch"
