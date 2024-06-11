@@ -1,0 +1,11 @@
+diff -purd a/t/01.regress.t b/t/01.regress.t
+--- a/t/01.regress.t	2008-07-25 02:33:18.000000000 +0200
++++ b/t/01.regress.t	2024-06-11 13:58:04.146762050 +0200
+@@ -69,6 +69,7 @@ my %good_results = (
+     '70@F@C'                                  => 21.11111111,    #--R--
+     '98.6@F@C'                                => 37,             #--R--
+     '1e+20@cubic microns@cubic inches'        => 6102374.409,    #--R--
++    '100000000000000000000@cubic microns@cubic inches' => 6102374.409,    #--R--
+     '980@microns@milliinches'                 => 38.58267717,    #--R--
+     '9700@microns@milli-inches'               => 381.8897638,    #--R--
+     '8976@microns@m-in'                       => 353.3858268,    #--R--
