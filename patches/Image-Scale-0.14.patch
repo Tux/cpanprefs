@@ -1,6 +1,18 @@
+diff -purd a/include/image.h b/include/image.h
+--- a/include/image.h	2017-11-28 03:39:02.000000000 +0100
++++ b/include/image.h	2024-06-12 11:10:57.115124796 +0200
+@@ -194,7 +194,7 @@ void image_downsize_gm(image *im);
+ void image_alloc(image *im, int width, int height);
+ void image_bgcolor_fill(pix *buf, int size, int bgcolor);
+ void image_finish(image *im);
+-inline void image_get_rotated_coords(image *im, int x, int y, int *ox, int *oy);
++void image_get_rotated_coords(image *im, int x, int y, int *ox, int *oy);
+ 
+ #ifdef HAVE_JPEG
+ int image_jpeg_read_header(image *im);
 diff -purd a/src/image.c b/src/image.c
 --- a/src/image.c	2017-11-28 03:37:18.000000000 +0100
-+++ b/src/image.c	2023-11-16 16:18:29.902983617 +0100
++++ b/src/image.c	2024-06-12 11:14:17.799733258 +0200
 @@ -45,7 +45,7 @@ image_init(HV *self, image *im)
    if (my_hv_exists(self, "file")) {
      // Input from file
@@ -10,9 +22,45 @@ diff -purd a/src/image.c b/src/image.c
      im->fh = IoIFP(sv_2io(*(my_hv_fetch(self, "_fh"))));
      im->path = newSVsv(path);
    }
+@@ -123,7 +123,7 @@ image_init(HV *self, image *im)
+   }
+   else {
+     im->sv_offset = MIN(sv_len(im->sv_data) - im->image_offset, BUFFER_SIZE);
+-    buffer_append(im->buf, SvPVX(im->sv_data) + im->image_offset, im->sv_offset);
++    buffer_append(im->buf, SvPV_nolen(im->sv_data) + im->image_offset, im->sv_offset);
+   }
+ 
+   bptr = buffer_ptr(im->buf);
+@@ -201,7 +201,7 @@ image_init(HV *self, image *im)
+       break;
+     case UNKNOWN:
+       warn("Image::Scale unknown file type (%s), first 8 bytes were: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+-        SvPVX(im->path), bptr[0], bptr[1], bptr[2], bptr[3], bptr[4], bptr[5], bptr[6], bptr[7]);
++        SvPV_nolen(im->path), bptr[0], bptr[1], bptr[2], bptr[3], bptr[4], bptr[5], bptr[6], bptr[7]);
+       ret = 0;
+       break;
+   }
+@@ -446,7 +446,7 @@ image_finish(image *im)
+   im->memory_used = 0;
+ }
+ 
+-inline void
++void
+ image_get_rotated_coords(image *im, int x, int y, int *ox, int *oy)
+ {
+   switch (im->orientation) {
+@@ -480,7 +480,7 @@ image_get_rotated_coords(image *im, int
+       break;
+     default:
+       if (x == 0 && y == 0 && im->orientation != 0) // An invalid orientation of 0 is often seen in non-rotated images
+-        warn("Image::Scale cannot rotate, unknown orientation value: %d (%s)\n", im->orientation, SvPVX(im->path));
++        warn("Image::Scale cannot rotate, unknown orientation value: %d (%s)\n", im->orientation, SvPV_nolen(im->path));
+       *ox = x;
+       *oy = y;
+       break;
 diff -purd a/t/stringify.t b/t/stringify.t
 --- a/t/stringify.t	2017-11-28 03:37:56.000000000 +0100
-+++ b/t/stringify.t	2023-11-16 16:21:55.709201943 +0100
++++ b/t/stringify.t	2024-06-12 11:17:50.084222714 +0200
 @@ -25,13 +25,13 @@ SKIP:
  {
      skip "Image::Scale not built with libjpeg support", 2 unless Image::Scale->jpeg_version;
