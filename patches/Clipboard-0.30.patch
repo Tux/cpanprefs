@@ -1,0 +1,20 @@
+diff -purd a/t/drivers.t b/t/drivers.t
+--- a/t/drivers.t	2024-06-16 14:02:12.000000000 +0200
++++ b/t/drivers.t	2024-09-18 09:26:27.440990100 +0200
+@@ -14,10 +14,15 @@ my %map = qw(
+     darwin MacPasteboard
+ );
+ 
++use_ok 'Clipboard::Xsel';
+ use_ok 'Clipboard::Xclip';
+ use_ok 'Clipboard';
+ 
+-if (exists $ENV{SSH_CONNECTION} && Clipboard::Xclip::xclip_available()) {
++if (exists $ENV{SSH_CONNECTION} && Clipboard::Xsel::xsel_available()) {
++    $map{Win32}  = 'Xsel';
++    $map{cygwin} = 'Xsel';
++}
++elsif (exists $ENV{SSH_CONNECTION} && Clipboard::Xclip::xclip_available()) {
+     $map{Win32}  = 'Xclip';
+     $map{cygwin} = 'Xclip';
+ }

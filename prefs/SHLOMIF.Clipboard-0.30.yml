@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "SHLOMIF/Clipboard-0.30"
+patches:
+  - "../../patches/Clipboard-0.30.patch"
