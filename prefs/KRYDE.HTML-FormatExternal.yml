@@ -1,0 +1,5 @@
+---
+match:
+  distribution: 'KRYDE/\QHTML-External-26'
+patches:
+  - ../../patches/HTML-External-26.patch

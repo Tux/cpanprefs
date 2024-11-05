@@ -1,0 +1,25 @@
+diff -purd a/lib/HTML/FormatText/Html2text.pm b/lib/HTML/FormatText/Html2text.pm
+--- a/lib/HTML/FormatText/Html2text.pm	2015-08-06 14:00:33.000000000 +0200
++++ b/lib/HTML/FormatText/Html2text.pm	2024-11-05 13:04:25.591992881 +0100
+@@ -65,7 +65,7 @@ sub _WIDE_OUTPUT_CHARSET {
+ 
+ sub program_full_version {
+   my ($self_or_class) = @_;
+-  return $self_or_class->_run_version (['html2text','-version'], '2>&1');
++  return $self_or_class->_run_version (['html2text','--version'], '2>&1');
+ }
+ sub program_version {
+   my ($self_or_class) = @_;
+@@ -85,10 +85,10 @@ sub _make_run {
+   # Backspaces are fun for teletype output, but the intention here is plain
+   # text.  The Debian html2text has -nobs by default anyway.
+   #
+-  my @command = ('html2text', '-nobs');
++  my @command = ('html2text');#, '-nobs');
+ 
+   if (defined $options->{'_width'}) {
+-    push @command, '-width', $options->{'_width'};
++    push @command, '--body-width', $options->{'_width'};
+   }
+ 
+   if ($class->_have_ascii) {
