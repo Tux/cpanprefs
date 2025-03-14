@@ -1,0 +1,12 @@
+diff -purd a/Mix.c b/Mix.c
+--- a/Mix.c	2003-03-27 06:43:11.000000000 +0100
++++ b/Mix.c	2025-03-14 10:45:53.321542889 +0100
+@@ -78,7 +78,7 @@ close_mixer() {
+ #ifdef DEBUG
+   fprintf(stderr, "close_mixer()\n");
+ #endif
+-  if (mixer_fd < 0) return;
++  if (mixer_fd < 0) return(0);
+   close(mixer_fd);
+   init_flag = 0;
+   mixer_fd = -1;

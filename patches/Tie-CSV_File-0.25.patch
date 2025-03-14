@@ -1,0 +1,22 @@
+diff -purd a/t/CommonStuff.pm b/t/CommonStuff.pm
+--- a/t/CommonStuff.pm	2020-05-04 07:31:22.000000000 +0200
++++ b/t/CommonStuff.pm	2025-03-14 09:39:32.446720440 +0100
+@@ -1,5 +1,5 @@
+ use Data::Dumper;
+-$Data::Dumper::Indent = undef;
++$Data::Dumper::Indent = 0;
+ 
+ use constant CSV_DATA => [
+     ['City',  'Inhabitants', 'Nice to live'],
+diff -purd a/t/fetch.t b/t/fetch.t
+--- a/t/fetch.t	2020-05-04 07:31:22.000000000 +0200
++++ b/t/fetch.t	2025-03-14 09:39:45.733631397 +0100
+@@ -3,7 +3,7 @@
+ use strict;
+ use warnings;
+ use File::Temp qw/tempfile tmpnam/;
+-use t'CommonStuff;
++use t::CommonStuff;
+ 
+ my ($csv_fh,$csv_name) = tempfile();
+ print $csv_fh CSV_FILE;

@@ -1,0 +1,12 @@
+diff -purd a/lib/Unix/Lsof.pm b/lib/Unix/Lsof.pm
+--- a/lib/Unix/Lsof.pm	2013-11-20 11:38:37.000000000 +0100
++++ b/lib/Unix/Lsof.pm	2025-03-14 14:16:21.747335291 +0100
+@@ -28,6 +28,8 @@ our %op_field = (
+     K => q(task id),
+     l => q(lock status),
+     L => q(login name),
++    m => q(repeat marker),
++    M => q(task command name),
+     n => q(file name),
+     N => q(node identifier),
+     o => q(file offset),

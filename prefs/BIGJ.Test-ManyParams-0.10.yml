@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "BIGJ/Test-ManyParams-0.10"
+patches:
+  - "../../patches/Test-ManyParams-0.10.patch"

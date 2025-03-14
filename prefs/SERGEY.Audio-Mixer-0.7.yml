@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "SERGEY/Audio-Mixer-0.7"
+patches:
+  - "../../patches/Audio-Mixer-0.7.patch"

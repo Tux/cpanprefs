@@ -1,0 +1,84 @@
+diff -purd a/t/all_arent.t b/t/all_arent.t
+--- a/t/all_arent.t	2002-08-13 09:07:46.000000000 +0200
++++ b/t/all_arent.t	2025-03-14 09:31:08.759193501 +0100
+@@ -8,7 +8,7 @@ use Test::More;
+ use Test::Exception;
+ use Test::Builder::Tester tests => 239;
+ use Data::Dumper;
+-use t'CommonStuff;
++use t::CommonStuff;
+ 
+ Test::Builder::Tester::color(1);
+ 
+diff -purd a/t/all_are.t b/t/all_are.t
+--- a/t/all_are.t	2002-08-13 09:01:44.000000000 +0200
++++ b/t/all_are.t	2025-03-14 09:31:14.294153130 +0100
+@@ -8,7 +8,7 @@ use Test::More;
+ use Test::Exception;
+ use Test::Builder::Tester tests => 239;
+ use Data::Dumper;
+-use t'CommonStuff;
++use t::CommonStuff;
+ 
+ Test::Builder::Tester::color(1);
+ 
+diff -purd a/t/all_params_are_passed.t b/t/all_params_are_passed.t
+--- a/t/all_params_are_passed.t	2002-08-19 13:14:22.000000000 +0200
++++ b/t/all_params_are_passed.t	2025-03-14 09:33:17.188284014 +0100
+@@ -6,7 +6,7 @@ use warnings;
+ use Test::ManyParams;
+ use Test::More tests => 3 * 2 * 4;
+ use Data::Dumper;
+-$Data::Dumper::Indent = undef;
++$Data::Dumper::Indent = 0;
+ 
+ sub knows_all_arguments {
+     my $test_method = shift();
+diff -purd a/t/any_isnt.t b/t/any_isnt.t
+--- a/t/any_isnt.t	2002-08-20 14:54:42.000000000 +0200
++++ b/t/any_isnt.t	2025-03-14 09:31:24.879076255 +0100
+@@ -8,7 +8,7 @@ use Test::More;
+ use Test::Exception;
+ use Test::Builder::Tester tests => 247;
+ use Data::Dumper;
+-use t'CommonStuff;
++use t::CommonStuff;
+ 
+ Test::Builder::Tester::color(1);
+ 
+diff -purd a/t/any_is.t b/t/any_is.t
+--- a/t/any_is.t	2002-08-20 14:44:38.000000000 +0200
++++ b/t/any_is.t	2025-03-14 09:31:28.247052391 +0100
+@@ -8,7 +8,7 @@ use Test::More;
+ use Test::Exception;
+ use Test::Builder::Tester tests => 247;
+ use Data::Dumper;
+-use t'CommonStuff;
++use t::CommonStuff;
+ 
+ Test::Builder::Tester::color(1);
+ 
+diff -purd a/t/any_ok.t b/t/any_ok.t
+--- a/t/any_ok.t	2002-08-19 13:05:39.000000000 +0200
++++ b/t/any_ok.t	2025-03-14 09:31:30.936033333 +0100
+@@ -8,7 +8,7 @@ use Test::More;
+ use Test::Exception;
+ use Test::Builder::Tester tests => 247;
+ use Data::Dumper;
+-use t'CommonStuff;
++use t::CommonStuff;
+ 
+ Test::Builder::Tester::color(1);
+ 
+diff -purd a/t/most_ok.t b/t/most_ok.t
+--- a/t/most_ok.t	2002-08-26 14:38:46.000000000 +0200
++++ b/t/most_ok.t	2025-03-14 09:31:41.251960223 +0100
+@@ -8,7 +8,7 @@ use Test::More;
+ use Test::Exception;
+ use Test::Builder::Tester tests => 33;
+ use Data::Dumper;
+-use t'CommonStuff;
++use t::CommonStuff;
+ 
+ Test::Builder::Tester::color(1);
+ 
