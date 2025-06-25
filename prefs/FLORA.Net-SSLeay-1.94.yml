@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "\\w+/Net-SSLeay-1.94"
+patches:
+  - "../../patches/Net-SSLeay-1.94.patch"
