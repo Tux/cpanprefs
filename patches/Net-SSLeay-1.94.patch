@@ -2,13 +2,16 @@ diff --git a/Changes b/Changes
 index 45727a3..0780434 100644
 --- a/Changes
 +++ b/Changes
-@@ -7,6 +7,9 @@ Revision history for Perl extension Net::SSLeay.
- 	- Update GitHub Actions CI workflow. A number of test jobs
- 	  were broken because some GitHub runners were discontinued,
- 	  changes in QEMU setup, changes in Cygwin, etc.
-+	- Adjust test 32_x509_get_cert_info.t to match formatting
-+	  changes in OpenSSL 3.4.0 and 3.4.1. Thanks to Sebastian
-+	  Andrzej Siewior for the patches.
+@@ -21,6 +21,9 @@ Revision history for Perl extension Net:
+ 	    processes a ClientHello message.
+ 	  - Many more libcrypto/libssl constants and functions are now exposed; see the
+ 	    release notes for the 1.93 developer releases for a full list.
++	  - Adjust test 32_x509_get_cert_info.t to match formatting
++	    changes in OpenSSL 3.4.0 and 3.4.1. Thanks to Sebastian
++	    Andrzej Siewior for the patches.
+ 
+ 1.93_05 2024-01-06
+ 	- Remove support for automatic detection of libssl/libcrypto via pkg-config
  
  1.94 2024-01-08
  	- New stable release incorporating all changes from developer releases 1.93_01
@@ -37,3 +40,5 @@ index 0f7e2d5..08316bf 100644
                    }
                }
                elsif ( $nid == 126 ) {
+--- Changes.orig	2024-01-08 02:17:02.000000000 +0100
++++ Changes	2025-06-25 11:09:10.129980580 +0200
