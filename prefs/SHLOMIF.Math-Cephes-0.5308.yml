@@ -1,0 +1,6 @@
+---
+comment: "correctly extend the stack"
+match:
+  distribution: '^SHLOMIF/Math-Cephes-0.5308'
+patches:
+  - "../../patches/Math-Cephes-0.5308.patch"
