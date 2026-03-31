@@ -13,27 +13,27 @@ diff -purd a/bin/json_pp b/bin/json_pp
  __END__
  
 diff -purd a/lib/JSON/PP.pm b/lib/JSON/PP.pm
---- a/lib/JSON/PP.pm	2022-12-30 05:31:10.000000000 +0100
-+++ b/lib/JSON/PP.pm	2023-06-08 08:54:24.254727787 +0200
-@@ -458,7 +458,8 @@ sub allow_bigint {
-         $self->_down_indent() if ($indent);
- 
+--- a/lib/JSON/PP.pm 2026-03-20 09:15:08.000000000 +0100
++++ b/lib/JSON/PP.pm 2026-03-31 09:34:58.468416510 +0200
+@@ -429,7 +429,8 @@ sub allow_bigint {
+         $self->_down_indent() if ($self->{PROPS}[P_INDENT]);
+
          return '{}' unless @res;
 -        return '{' . $pre . join( ",$pre", @res ) . $post . '}';
 +        my $close_indent = $pre ? " " x $self->{indent_length} : "";
 +        return '{' . $pre . join( ",$pre", @res ) . $post . $close_indent . '}';
      }
- 
- 
-@@ -479,7 +480,8 @@ sub allow_bigint {
-         $self->_down_indent() if ($indent);
- 
+
+
+@@ -451,7 +452,8 @@ sub allow_bigint {
+
          return '[]' unless @res;
--        return '[' . $pre . join( ",$pre", @res ) . $post . ']';
+         my $space = $pre eq '' && $self->{PROPS}[P_SPACE_AFTER] ? ' ' : '';
+-        return '[' . $pre . join( ",$space$pre", @res ) . $post . ']';
 +        my $close_indent = $pre ? " " x $self->{indent_length} : "";
-+        return '[' . $pre . join( ",$pre", @res ) . $post . $close_indent . ']';
++        return '[' . $pre . join( ",$space$pre", @res ) . $post . . $close_indent . ']';
      }
- 
+
      sub _looks_like_number {
 diff -purd a/t/006_pc_pretty.t b/t/006_pc_pretty.t
 --- a/t/006_pc_pretty.t	2022-06-24 08:07:45.000000000 +0200

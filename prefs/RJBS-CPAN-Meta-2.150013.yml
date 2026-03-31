@@ -1,0 +1,6 @@
+---
+comment: "Indentation might have been fixed/improved for readability"
+match:
+  distribution: '^RJBS/CPAN-Meta-2.150013'
+patches:
+  - "../../patches/CPAN-Meta-2.150013.patch"

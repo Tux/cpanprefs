@@ -1,0 +1,6 @@
+---
+comment: "false incompatible"
+match:
+  distribution: '^STBEY/Bit-Vector-7.4'
+patches:
+  - "../../patches/Bit-Vector-7.4.patch"
