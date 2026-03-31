@@ -1,6 +1,6 @@
 diff -purd a/bin/cpanel_json_xs b/bin/cpanel_json_xs
 --- a/bin/cpanel_json_xs	2022-05-03 13:12:46.000000000 +0200
-+++ b/bin/cpanel_json_xs	2026-03-31 14:20:15.488081958 +0200
++++ b/bin/cpanel_json_xs	2026-03-31 17:13:15.930087860 +0200
 @@ -2,15 +2,15 @@
  
  =head1 NAME
@@ -128,7 +128,7 @@ diff -purd a/bin/cpanel_json_xs b/bin/cpanel_json_xs
     "storable-file" => sub { open my $fh, ">", \my $buf; Storable::nstore_fd $_, $fh; $buf },
 diff -purd a/Changes b/Changes
 --- a/Changes	2025-09-08 13:53:39.000000000 +0200
-+++ b/Changes	2026-03-31 14:13:40.128653722 +0200
++++ b/Changes	2026-03-31 17:13:15.930282895 +0200
 @@ -1,4 +1,4 @@
 -Revision history for Perl extension Cpanel::JSON::XS
 +Revision history for Perl extension JSON::XS
@@ -173,7 +173,7 @@ diff -purd a/Changes b/Changes
           JSON does not support JSON::XS booleans anymore, so
 diff -purd a/eg/bench b/eg/bench
 --- a/eg/bench	2022-05-03 13:12:26.000000000 +0200
-+++ b/eg/bench	2026-03-31 14:13:40.129258355 +0200
++++ b/eg/bench	2026-03-31 17:13:15.930478011 +0200
 @@ -10,9 +10,9 @@ my %tst = (
     "JSON::DWIW/DS" => ['$dwiw->to_json ($perl)'   , 'JSON::DWIW::deserialize $json'],
  #   "JSON::PC"      => ['$pc->convert ($perl)'     , '$pc->parse ($json)'],
@@ -232,7 +232,7 @@ diff -purd a/eg/bench b/eg/bench
     my $times = 200;
 diff -purd a/Makefile.PL b/Makefile.PL
 --- a/Makefile.PL	2025-09-08 15:31:58.000000000 +0200
-+++ b/Makefile.PL	2026-03-31 14:18:48.007198291 +0200
++++ b/Makefile.PL	2026-03-31 17:13:15.930594118 +0200
 @@ -2,6 +2,8 @@ use 5.006002;
  use ExtUtils::MakeMaker;
  use Config;
@@ -254,9 +254,21 @@ diff -purd a/Makefile.PL b/Makefile.PL
    CONFIGURE_REQUIRES => {
      'Config'              => 0,
      'ExtUtils::MakeMaker' => 0,
+diff -purd a/MANIFEST b/MANIFEST
+--- a/MANIFEST	2025-09-08 16:00:51.000000000 +0200
++++ b/MANIFEST	2026-03-31 17:13:15.937926604 +0200
+@@ -12,7 +12,7 @@ XS.pm
+ XS.xs
+ XS/Boolean.pm
+ XS/Type.pm
+-bin/cpanel_json_xs
++bin/json_xs
+ eg/bench
+ ppport.h
+ t/00_load.t
 diff -purd a/README b/README
 --- a/README	2025-09-08 16:00:54.000000000 +0200
-+++ b/README	2026-03-31 14:13:40.136608271 +0200
++++ b/README	2026-03-31 17:13:15.930786879 +0200
 @@ -1,8 +1,8 @@
  NAME
 -    Cpanel::JSON::XS - cPanel fork of JSON::XS, fast and correct serializing
@@ -1002,7 +1014,7 @@ diff -purd a/README b/README
      Mojo::JSON::MaybeXS, JSON::SL, JSON::DWIW, JSON::YAJL, JSON::Any,
 diff -purd a/t/00_load.t b/t/00_load.t
 --- a/t/00_load.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/00_load.t	2026-03-31 14:13:40.138283608 +0200
++++ b/t/00_load.t	2026-03-31 17:13:15.931218308 +0200
 @@ -1,5 +1,5 @@
  BEGIN { $| = 1; print "1..1\n"; }
  END {print "not ok 1\n" unless $loaded;}
@@ -1012,7 +1024,7 @@ diff -purd a/t/00_load.t b/t/00_load.t
  print "ok 1\n";
 diff -purd a/t/01_utf8.t b/t/01_utf8.t
 --- a/t/01_utf8.t	2024-12-12 21:50:31.000000000 +0100
-+++ b/t/01_utf8.t	2026-03-31 14:13:40.138522716 +0200
++++ b/t/01_utf8.t	2026-03-31 17:13:15.931316031 +0200
 @@ -1,43 +1,43 @@
  use Test::More tests => 152;
  use utf8;
@@ -1077,7 +1089,7 @@ diff -purd a/t/01_utf8.t b/t/01_utf8.t
  # TODO: test utf8 hash keys,
 diff -purd a/t/02_error.t b/t/02_error.t
 --- a/t/02_error.t	2025-09-08 13:53:39.000000000 +0200
-+++ b/t/02_error.t	2026-03-31 14:13:40.138655926 +0200
++++ b/t/02_error.t	2026-03-31 17:13:30.273552545 +0200
 @@ -1,50 +1,50 @@
  use Test::More tests => 41;
  
@@ -1160,10 +1172,23 @@ diff -purd a/t/02_error.t b/t/02_error.t
  
  # RFC 7159: missing optional 2nd allow_nonref arg
  eval { decode_json ("null") }; ok $@ =~ /JSON text must be an object or array/, "null";
-Only in b/t: 02_error.t.orig
+@@ -53,8 +53,8 @@ eval { decode_json ("false") }; ok $@ =~
+ eval { decode_json ("1") }; ok $@ =~ /JSON text must be an object or array/, "wrong 1";
+ 
+ # more malformed numbers
+-eval { Cpanel::JSON::XS->new->allow_nonref->decode ('001') }; ok $@ =~ /malformed number/;
+-eval { Cpanel::JSON::XS->new->allow_nonref->decode ('1.0.1') }; ok !!$@;
+-eval { Cpanel::JSON::XS->new->allow_nonref->decode ('1.0.') }; ok !!$@;
+-eval { Cpanel::JSON::XS->new->allow_nonref->decode ('1.') }; ok $@ =~ /malformed number/;
+-eval { Cpanel::JSON::XS->new->allow_nonref->decode ('-') }; ok $@ =~ /malformed number/;
++eval { JSON::XS->new->allow_nonref->decode ('001') }; ok $@ =~ /malformed number/;
++eval { JSON::XS->new->allow_nonref->decode ('1.0.1') }; ok !!$@;
++eval { JSON::XS->new->allow_nonref->decode ('1.0.') }; ok !!$@;
++eval { JSON::XS->new->allow_nonref->decode ('1.') }; ok $@ =~ /malformed number/;
++eval { JSON::XS->new->allow_nonref->decode ('-') }; ok $@ =~ /malformed number/;
 diff -purd a/t/03_types.t b/t/03_types.t
 --- a/t/03_types.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/03_types.t	2026-03-31 14:13:40.138773917 +0200
++++ b/t/03_types.t	2026-03-31 17:13:15.931529541 +0200
 @@ -1,22 +1,22 @@
  BEGIN { $| = 1; print "1..87\n"; }
  use utf8;
@@ -1240,7 +1265,7 @@ diff -purd a/t/03_types.t b/t/03_types.t
     ok ($v == ((decode_json "[$v]")->[0]));
 diff -purd a/t/04_dwiw_encode.t b/t/04_dwiw_encode.t
 --- a/t/04_dwiw_encode.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/04_dwiw_encode.t	2026-03-31 14:13:40.138850831 +0200
++++ b/t/04_dwiw_encode.t	2026-03-31 17:13:15.931628215 +0200
 @@ -1,6 +1,6 @@
  #! perl
  
@@ -1269,7 +1294,7 @@ diff -purd a/t/04_dwiw_encode.t b/t/04_dwiw_encode.t
  
 diff -purd a/t/05_dwiw_decode.t b/t/05_dwiw_decode.t
 --- a/t/05_dwiw_decode.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/05_dwiw_decode.t	2026-03-31 14:13:40.138915782 +0200
++++ b/t/05_dwiw_decode.t	2026-03-31 17:13:15.931704859 +0200
 @@ -1,6 +1,6 @@
  #! perl
  
@@ -1294,7 +1319,7 @@ diff -purd a/t/05_dwiw_decode.t b/t/05_dwiw_decode.t
      my $pass = 1;
 diff -purd a/t/06_pc_pretty.t b/t/06_pc_pretty.t
 --- a/t/06_pc_pretty.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/06_pc_pretty.t	2026-03-31 14:13:40.138989831 +0200
++++ b/t/06_pc_pretty.t	2026-03-31 17:13:15.931797232 +0200
 @@ -1,15 +1,15 @@
  #! perl
  
@@ -1376,7 +1401,7 @@ diff -purd a/t/06_pc_pretty.t b/t/06_pc_pretty.t
  
 diff -purd a/t/07_pc_esc.t b/t/07_pc_esc.t
 --- a/t/07_pc_esc.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/07_pc_esc.t	2026-03-31 14:13:40.139052769 +0200
++++ b/t/07_pc_esc.t	2026-03-31 17:13:15.931872964 +0200
 @@ -2,18 +2,18 @@
  # このファイルのエンコーディングはUTF-8
  #
@@ -1401,7 +1426,7 @@ diff -purd a/t/07_pc_esc.t b/t/07_pc_esc.t
  $str = $pc->encode($obj);
 diff -purd a/t/08_pc_base_nv.t b/t/08_pc_base_nv.t
 --- a/t/08_pc_base_nv.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/08_pc_base_nv.t	2026-03-31 14:13:40.139111479 +0200
++++ b/t/08_pc_base_nv.t	2026-03-31 17:13:15.931943025 +0200
 @@ -1,9 +1,9 @@
  use Test::More tests => 1;
  
@@ -1416,7 +1441,7 @@ diff -purd a/t/08_pc_base_nv.t b/t/08_pc_base_nv.t
  is($o->[0],"-0.12");
 diff -purd a/t/08_pc_base.t b/t/08_pc_base.t
 --- a/t/08_pc_base.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/08_pc_base.t	2026-03-31 14:13:40.139173215 +0200
++++ b/t/08_pc_base.t	2026-03-31 17:13:15.932015090 +0200
 @@ -1,13 +1,13 @@
  use Test::More tests => 20;
  
@@ -1436,7 +1461,7 @@ diff -purd a/t/08_pc_base.t b/t/08_pc_base.t
  
 diff -purd a/t/09_pc_extra_number.t b/t/09_pc_extra_number.t
 --- a/t/09_pc_extra_number.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/09_pc_extra_number.t	2026-03-31 14:13:40.139242515 +0200
++++ b/t/09_pc_extra_number.t	2026-03-31 17:13:15.932086304 +0200
 @@ -1,14 +1,14 @@
 -# copied over from JSON::PC and modified to use Cpanel::JSON::XS
 +# copied over from JSON::PC and modified to use JSON::XS
@@ -1457,7 +1482,7 @@ diff -purd a/t/09_pc_extra_number.t b/t/09_pc_extra_number.t
  $obj = $pc->decode($js);
 diff -purd a/t/104_sortby.t b/t/104_sortby.t
 --- a/t/104_sortby.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/104_sortby.t	2026-03-31 14:13:40.139301385 +0200
++++ b/t/104_sortby.t	2026-03-31 17:13:15.932161474 +0200
 @@ -1,11 +1,11 @@
  
  use Test::More tests => 3;
@@ -1487,7 +1512,7 @@ diff -purd a/t/104_sortby.t b/t/104_sortby.t
 +sub JSON::XS::hoge { $JSON::XS::a cmp $JSON::XS::b }
 diff -purd a/t/105_esc_slash.t b/t/105_esc_slash.t
 --- a/t/105_esc_slash.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/105_esc_slash.t	2026-03-31 14:13:40.139356498 +0200
++++ b/t/105_esc_slash.t	2026-03-31 17:13:15.932229973 +0200
 @@ -1,10 +1,10 @@
  
  use Test::More tests => 2;
@@ -1503,7 +1528,7 @@ diff -purd a/t/105_esc_slash.t b/t/105_esc_slash.t
  
 diff -purd a/t/106_allow_barekey.t b/t/106_allow_barekey.t
 --- a/t/106_allow_barekey.t	2023-02-22 12:08:39.000000000 +0100
-+++ b/t/106_allow_barekey.t	2026-03-31 14:13:40.139413375 +0200
++++ b/t/106_allow_barekey.t	2026-03-31 17:13:15.932299052 +0200
 @@ -2,10 +2,10 @@
  use Test::More tests => 6;
  use strict;
@@ -1519,7 +1544,7 @@ diff -purd a/t/106_allow_barekey.t b/t/106_allow_barekey.t
  ok($@); # in XS and PP, the error message differs.
 diff -purd a/t/107_allow_singlequote.t b/t/107_allow_singlequote.t
 --- a/t/107_allow_singlequote.t	2023-06-19 16:02:27.000000000 +0200
-+++ b/t/107_allow_singlequote.t	2026-03-31 14:13:40.139472766 +0200
++++ b/t/107_allow_singlequote.t	2026-03-31 17:13:15.932370696 +0200
 @@ -1,10 +1,10 @@
  
  use Test::More tests => 10;
@@ -1535,7 +1560,7 @@ diff -purd a/t/107_allow_singlequote.t b/t/107_allow_singlequote.t
  ok($@, "error $@"); # in XS and PP, the error message differs.
 diff -purd a/t/108_decode.t b/t/108_decode.t
 --- a/t/108_decode.t	2022-05-03 13:13:02.000000000 +0200
-+++ b/t/108_decode.t	2026-03-31 14:13:40.139532648 +0200
++++ b/t/108_decode.t	2026-03-31 17:13:15.932443272 +0200
 @@ -4,12 +4,12 @@
  use strict;
  use Test::More tests => 11;
@@ -1553,7 +1578,7 @@ diff -purd a/t/108_decode.t b/t/108_decode.t
    skip "5.6", 1 if $] < 5.008;
 diff -purd a/t/109_encode.t b/t/109_encode.t
 --- a/t/109_encode.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/109_encode.t	2026-03-31 14:13:40.139596288 +0200
++++ b/t/109_encode.t	2026-03-31 17:13:15.932521860 +0200
 @@ -4,7 +4,7 @@
  use strict;
  use Test::More tests => 7;
@@ -1574,7 +1599,7 @@ diff -purd a/t/109_encode.t b/t/109_encode.t
  
 diff -purd a/t/10_pc_keysort.t b/t/10_pc_keysort.t
 --- a/t/10_pc_keysort.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/10_pc_keysort.t	2026-03-31 14:13:40.139655278 +0200
++++ b/t/10_pc_keysort.t	2026-03-31 17:13:15.932597992 +0200
 @@ -1,13 +1,13 @@
 -# copied over from JSON::PC and modified to use Cpanel::JSON::XS
 +# copied over from JSON::PC and modified to use JSON::XS
@@ -1594,7 +1619,7 @@ diff -purd a/t/10_pc_keysort.t b/t/10_pc_keysort.t
  
 diff -purd a/t/110_bignum.t b/t/110_bignum.t
 --- a/t/110_bignum.t	2025-09-08 13:53:39.000000000 +0200
-+++ b/t/110_bignum.t	2026-03-31 14:13:40.139720280 +0200
++++ b/t/110_bignum.t	2026-03-31 17:13:15.932675127 +0200
 @@ -8,11 +8,11 @@ BEGIN {
  use Test::More $has_bignum
    ? (tests => 20)
@@ -1611,7 +1636,7 @@ diff -purd a/t/110_bignum.t b/t/110_bignum.t
  
 diff -purd a/t/112_upgrade.t b/t/112_upgrade.t
 --- a/t/112_upgrade.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/112_upgrade.t	2026-03-31 14:13:40.139782236 +0200
++++ b/t/112_upgrade.t	2026-03-31 17:13:15.932746771 +0200
 @@ -1,13 +1,13 @@
  use strict;
  use Test::More tests => 3;
@@ -1630,7 +1655,7 @@ diff -purd a/t/112_upgrade.t b/t/112_upgrade.t
  my $value = $json->decode( '"\\u00c8"' );
 diff -purd a/t/113_overloaded_eq.t b/t/113_overloaded_eq.t
 --- a/t/113_overloaded_eq.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/113_overloaded_eq.t	2026-03-31 14:13:40.139851947 +0200
++++ b/t/113_overloaded_eq.t	2026-03-31 17:13:15.932824577 +0200
 @@ -3,9 +3,9 @@
  use strict;
  use Test::More tests => 15;
@@ -1674,7 +1699,7 @@ diff -purd a/t/113_overloaded_eq.t b/t/113_overloaded_eq.t
  
 diff -purd a/t/114_decode_prefix.t b/t/114_decode_prefix.t
 --- a/t/114_decode_prefix.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/114_decode_prefix.t	2026-03-31 14:13:40.140035260 +0200
++++ b/t/114_decode_prefix.t	2026-03-31 17:13:15.932893646 +0200
 @@ -3,9 +3,9 @@
  use strict;
  use Test::More tests => 12;
@@ -1689,7 +1714,7 @@ diff -purd a/t/114_decode_prefix.t b/t/114_decode_prefix.t
  my $garbaged_text  = qq/{"foo":"bar"}\n/;
 diff -purd a/t/115_tie_ixhash.t b/t/115_tie_ixhash.t
 --- a/t/115_tie_ixhash.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/115_tie_ixhash.t	2026-03-31 14:13:40.140220397 +0200
++++ b/t/115_tie_ixhash.t	2026-03-31 17:13:15.932973045 +0200
 @@ -1,7 +1,7 @@
  
  use strict;
@@ -1719,7 +1744,7 @@ diff -purd a/t/115_tie_ixhash.t b/t/115_tie_ixhash.t
  }
 diff -purd a/t/116_incr_parse_fixed.t b/t/116_incr_parse_fixed.t
 --- a/t/116_incr_parse_fixed.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/116_incr_parse_fixed.t	2026-03-31 14:13:40.140373905 +0200
++++ b/t/116_incr_parse_fixed.t	2026-03-31 17:13:15.933045130 +0200
 @@ -3,9 +3,9 @@
  use strict;
  use Test::More tests => 4;
@@ -1743,7 +1768,7 @@ diff -purd a/t/116_incr_parse_fixed.t b/t/116_incr_parse_fixed.t
  ok( not scalar(@vs) );
 diff -purd a/t/117_numbers.t b/t/117_numbers.t
 --- a/t/117_numbers.t	2023-06-19 15:23:34.000000000 +0200
-+++ b/t/117_numbers.t	2026-03-31 14:13:40.140554583 +0200
++++ b/t/117_numbers.t	2026-03-31 17:13:15.933130259 +0200
 @@ -1,5 +1,5 @@
  use strict;
 -use Cpanel::JSON::XS;
@@ -1780,7 +1805,7 @@ diff -purd a/t/117_numbers.t b/t/117_numbers.t
  is $json->encode([-sin(9**9**9)]),   '["nan"]',  "nan";
 diff -purd a/t/118_type.t b/t/118_type.t
 --- a/t/118_type.t	2022-05-06 07:40:07.000000000 +0200
-+++ b/t/118_type.t	2026-03-31 14:13:40.140792780 +0200
++++ b/t/118_type.t	2026-03-31 17:13:15.933242029 +0200
 @@ -3,8 +3,8 @@ use warnings;
  
  use Config;
@@ -1861,7 +1886,7 @@ diff -purd a/t/118_type.t b/t/118_type.t
      my $json_string = $cjson->encode($perl_struct, $type_spec);
 diff -purd a/t/119_type_decode.t b/t/119_type_decode.t
 --- a/t/119_type_decode.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/119_type_decode.t	2026-03-31 14:13:40.140911272 +0200
++++ b/t/119_type_decode.t	2026-03-31 17:13:15.933361813 +0200
 @@ -1,12 +1,12 @@
  use strict;
  use warnings;
@@ -1910,7 +1935,7 @@ diff -purd a/t/119_type_decode.t b/t/119_type_decode.t
  }
 diff -purd a/t/11_pc_expo.t b/t/11_pc_expo.t
 --- a/t/11_pc_expo.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/11_pc_expo.t	2026-03-31 14:13:40.140969410 +0200
++++ b/t/11_pc_expo.t	2026-03-31 17:13:15.933432976 +0200
 @@ -1,14 +1,14 @@
 -# copied over from JSON::XS and modified to use Cpanel::JSON::XS
 +# copied over from JSON::XS and modified to use JSON::XS
@@ -1931,7 +1956,7 @@ diff -purd a/t/11_pc_expo.t b/t/11_pc_expo.t
  $obj = $pc->decode($js);
 diff -purd a/t/120_type_all_string.t b/t/120_type_all_string.t
 --- a/t/120_type_all_string.t	2024-12-12 21:50:46.000000000 +0100
-+++ b/t/120_type_all_string.t	2026-03-31 14:13:40.141026978 +0200
++++ b/t/120_type_all_string.t	2026-03-31 17:13:15.933506033 +0200
 @@ -1,17 +1,17 @@
  use strict;
  use warnings;
@@ -1955,7 +1980,7 @@ diff -purd a/t/120_type_all_string.t b/t/120_type_all_string.t
  is($sjson->encode(undef), 'null');
 diff -purd a/t/121_memleak.t b/t/121_memleak.t
 --- a/t/121_memleak.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/121_memleak.t	2026-03-31 14:13:40.141083584 +0200
++++ b/t/121_memleak.t	2026-03-31 17:13:15.933865847 +0200
 @@ -1,13 +1,13 @@
  use strict;
  use warnings;
@@ -1974,7 +1999,7 @@ diff -purd a/t/121_memleak.t b/t/121_memleak.t
  $json->decode($x, my $types);
 diff -purd a/t/125_shared_boolean.t b/t/125_shared_boolean.t
 --- a/t/125_shared_boolean.t	2022-05-03 13:13:02.000000000 +0200
-+++ b/t/125_shared_boolean.t	2026-03-31 14:13:40.141157974 +0200
++++ b/t/125_shared_boolean.t	2026-03-31 17:13:15.933948612 +0200
 @@ -1,7 +1,7 @@
  use strict;
  use Config;
@@ -2016,7 +2041,7 @@ diff -purd a/t/125_shared_boolean.t b/t/125_shared_boolean.t
  SKIP: {
 diff -purd a/t/12_blessed.t b/t/12_blessed.t
 --- a/t/12_blessed.t	2023-06-19 15:23:34.000000000 +0200
-+++ b/t/12_blessed.t	2026-03-31 14:13:40.141221092 +0200
++++ b/t/12_blessed.t	2026-03-31 17:13:15.934024605 +0200
 @@ -1,5 +1,5 @@
  use strict;
 -use Cpanel::JSON::XS;
@@ -2044,7 +2069,7 @@ diff -purd a/t/12_blessed.t b/t/12_blessed.t
  ok ($js->encode ($o2) eq "null");
 diff -purd a/t/13_limit.t b/t/13_limit.t
 --- a/t/13_limit.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/13_limit.t	2026-03-31 14:13:40.141276716 +0200
++++ b/t/13_limit.t	2026-03-31 17:13:15.934092792 +0200
 @@ -1,9 +1,9 @@
  use Test::More $] < 5.008 ? (skip_all => "5.6") : (tests => 11);
 -use Cpanel::JSON::XS;
@@ -2059,7 +2084,7 @@ diff -purd a/t/13_limit.t b/t/13_limit.t
  ok (ref $js->decode (("[" x $def) . ("]" x $def)));
 diff -purd a/t/14_latin1.t b/t/14_latin1.t
 --- a/t/14_latin1.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/14_latin1.t	2026-03-31 14:13:40.142608262 +0200
++++ b/t/14_latin1.t	2026-03-31 17:13:15.934172141 +0200
 @@ -1,8 +1,8 @@
 -use Cpanel::JSON::XS;
 +use JSON::XS;
@@ -2109,7 +2134,7 @@ diff -purd a/t/14_latin1.t b/t/14_latin1.t
     "I \x{e2}\x{9d}\x{a4} perl", 'non-utf8 dec binary');
 diff -purd a/t/15_prefix.t b/t/15_prefix.t
 --- a/t/15_prefix.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/15_prefix.t	2026-03-31 14:13:40.143995681 +0200
++++ b/t/15_prefix.t	2026-03-31 17:13:15.934238676 +0200
 @@ -1,7 +1,7 @@
  use Test::More tests => 4;
 -use Cpanel::JSON::XS;
@@ -2122,7 +2147,7 @@ diff -purd a/t/15_prefix.t b/t/15_prefix.t
  ok (!$@);
 diff -purd a/t/16_tied.t b/t/16_tied.t
 --- a/t/16_tied.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/16_tied.t	2026-03-31 14:13:40.144126296 +0200
++++ b/t/16_tied.t	2026-03-31 17:13:15.934305631 +0200
 @@ -1,9 +1,9 @@
  use Test::More tests => 4;
 -use Cpanel::JSON::XS;
@@ -2137,7 +2162,7 @@ diff -purd a/t/16_tied.t b/t/16_tied.t
  %h = (a => 1);
 diff -purd a/t/17_relaxed.t b/t/17_relaxed.t
 --- a/t/17_relaxed.t	2022-05-03 13:13:02.000000000 +0200
-+++ b/t/17_relaxed.t	2026-03-31 14:13:40.144249387 +0200
++++ b/t/17_relaxed.t	2026-03-31 17:13:15.934373288 +0200
 @@ -1,7 +1,7 @@
  use Test::More $] < 5.008 ? (skip_all => "5.6") : (tests => 13);
 -use Cpanel::JSON::XS;
@@ -2150,7 +2175,7 @@ diff -purd a/t/17_relaxed.t b/t/17_relaxed.t
  is (encode_json ($json->decode ('[1,2, 4 , ]')), '[1,2,4]');
 diff -purd a/t/18_json_checker.t b/t/18_json_checker.t
 --- a/t/18_json_checker.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/18_json_checker.t	2026-03-31 14:13:40.144382136 +0200
++++ b/t/18_json_checker.t	2026-03-31 17:13:15.934448459 +0200
 @@ -7,12 +7,12 @@ use strict;
  no warnings;
  use Test::More $] < 5.008 ? (skip_all => "5.6") : (tests => 39);
@@ -2169,7 +2194,7 @@ diff -purd a/t/18_json_checker.t b/t/18_json_checker.t
  
 diff -purd a/t/19_incr.t b/t/19_incr.t
 --- a/t/19_incr.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/19_incr.t	2026-03-31 14:13:40.144557013 +0200
++++ b/t/19_incr.t	2026-03-31 17:13:15.934535682 +0200
 @@ -4,7 +4,7 @@ use strict;
  no warnings;
  use Test::More $] < 5.008 ? (tests => 39) : (tests => 702);
@@ -2247,7 +2272,7 @@ diff -purd a/t/19_incr.t b/t/19_incr.t
     is ($@, '', 'incr_text allowed after incr_parse init');
 diff -purd a/t/20_faihu.t b/t/20_faihu.t
 --- a/t/20_faihu.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/20_faihu.t	2026-03-31 14:13:40.144694902 +0200
++++ b/t/20_faihu.t	2026-03-31 17:13:15.934622755 +0200
 @@ -5,23 +5,23 @@
  use strict;
  use warnings;
@@ -2278,7 +2303,7 @@ diff -purd a/t/20_faihu.t b/t/20_faihu.t
  is ($roundtrip, $faihu, 'JSON with external recoding roundtrips correctly' );
 diff -purd a/t/20_unknown.t b/t/20_unknown.t
 --- a/t/20_unknown.t	2024-07-04 12:37:35.000000000 +0200
-+++ b/t/20_unknown.t	2026-03-31 14:13:40.144820968 +0200
++++ b/t/20_unknown.t	2026-03-31 17:13:15.934698647 +0200
 @@ -10,10 +10,10 @@ BEGIN {
  use constant HAVE_BOOLEANS => ($^V ge v5.36);
  plan tests => 32;
@@ -2294,7 +2319,7 @@ diff -purd a/t/20_unknown.t b/t/20_unknown.t
  ok( $@ =~ /encountered CODE/, $@ );
 diff -purd a/t/21_evans.t b/t/21_evans.t
 --- a/t/21_evans.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/21_evans.t	2026-03-31 14:13:40.144938739 +0200
++++ b/t/21_evans.t	2026-03-31 17:13:15.934766785 +0200
 @@ -5,13 +5,13 @@
  use strict;
  use warnings;
@@ -2314,7 +2339,7 @@ diff -purd a/t/21_evans.t b/t/21_evans.t
  die "no object" if !$object;
 diff -purd a/t/22_comment_at_eof.t b/t/22_comment_at_eof.t
 --- a/t/22_comment_at_eof.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/22_comment_at_eof.t	2026-03-31 14:13:40.145058523 +0200
++++ b/t/22_comment_at_eof.t	2026-03-31 17:13:15.934835644 +0200
 @@ -5,14 +5,14 @@ use warnings;
  
  use Test::More tests => 13;
@@ -2334,7 +2359,7 @@ diff -purd a/t/22_comment_at_eof.t b/t/22_comment_at_eof.t
  
 diff -purd a/t/23_array_ctx.t b/t/23_array_ctx.t
 --- a/t/23_array_ctx.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/23_array_ctx.t	2026-03-31 14:13:40.145184299 +0200
++++ b/t/23_array_ctx.t	2026-03-31 17:13:15.934906747 +0200
 @@ -1,19 +1,19 @@
  print "1..5\n";
 -use Cpanel::JSON::XS;
@@ -2363,7 +2388,7 @@ diff -purd a/t/23_array_ctx.t b/t/23_array_ctx.t
  print "ok 5\n";
 diff -purd a/t/24_freeze_recursion.t b/t/24_freeze_recursion.t
 --- a/t/24_freeze_recursion.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/24_freeze_recursion.t	2026-03-31 14:13:40.145303342 +0200
++++ b/t/24_freeze_recursion.t	2026-03-31 17:13:15.934976287 +0200
 @@ -1,10 +1,10 @@
 -use Cpanel::JSON::XS;
 +use JSON::XS;
@@ -2379,7 +2404,7 @@ diff -purd a/t/24_freeze_recursion.t b/t/24_freeze_recursion.t
          bar => Foo->new(foo => $foo),
 diff -purd a/t/25_boolean.t b/t/25_boolean.t
 --- a/t/25_boolean.t	2024-07-04 12:49:26.000000000 +0200
-+++ b/t/25_boolean.t	2026-03-31 14:13:40.145449315 +0200
++++ b/t/25_boolean.t	2026-03-31 17:13:15.935062289 +0200
 @@ -1,7 +1,7 @@
  use strict;
  use constant HAVE_BOOLEANS => ($^V ge v5.36);
@@ -2439,7 +2464,7 @@ diff -purd a/t/25_boolean.t b/t/25_boolean.t
  $js = $unblessed_bool_cjson->decode($booltrue);
 diff -purd a/t/26_duplicate.t b/t/26_duplicate.t
 --- a/t/26_duplicate.t	2022-05-06 07:40:07.000000000 +0200
-+++ b/t/26_duplicate.t	2026-03-31 14:13:40.145593325 +0200
++++ b/t/26_duplicate.t	2026-03-31 17:13:15.935138521 +0200
 @@ -1,8 +1,8 @@
  use strict;
  use Test::More tests => 12;
@@ -2453,7 +2478,7 @@ diff -purd a/t/26_duplicate.t b/t/26_duplicate.t
  ok (!eval { $json->decode ('{"a":"b","a":"c"}') }); # y_object_duplicated_key.json
 diff -purd a/t/30_jsonspec.t b/t/30_jsonspec.t
 --- a/t/30_jsonspec.t	2024-12-12 21:55:54.000000000 +0100
-+++ b/t/30_jsonspec.t	2026-03-31 14:13:40.145675349 +0200
++++ b/t/30_jsonspec.t	2026-03-31 17:13:15.935214995 +0200
 @@ -1,12 +1,12 @@
  # regressions and differences from the JSON Specs and JSON::PP
  # detected by http://seriot.ch/json/parsing.html
@@ -2472,7 +2497,7 @@ diff -purd a/t/30_jsonspec.t b/t/30_jsonspec.t
  # done:
 diff -purd a/t/31_bom.t b/t/31_bom.t
 --- a/t/31_bom.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/31_bom.t	2026-03-31 14:13:40.145732185 +0200
++++ b/t/31_bom.t	2026-03-31 17:13:15.935293973 +0200
 @@ -3,12 +3,12 @@
  # https://tools.ietf.org/html/rfc7159#section-8.1
  # JSON text SHALL be encoded in UTF-8, UTF-16, or UTF-32.
@@ -2499,7 +2524,7 @@ diff -purd a/t/31_bom.t b/t/31_bom.t
      $j->encode({ example => "data with non-ASCII characters",
 diff -purd a/t/52_object.t b/t/52_object.t
 --- a/t/52_object.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/52_object.t	2026-03-31 14:13:40.145789212 +0200
++++ b/t/52_object.t	2026-03-31 17:13:15.935375726 +0200
 @@ -1,20 +1,20 @@
  BEGIN { $| = 1; print "1..20\n"; }
  BEGIN { $^W = 0 } # hate
@@ -2562,7 +2587,7 @@ diff -purd a/t/52_object.t b/t/52_object.t
  print $dec eq 777 ? "" : "not ", "ok 19\n";
 diff -purd a/t/53_readonly.t b/t/53_readonly.t
 --- a/t/53_readonly.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/53_readonly.t	2026-03-31 14:13:40.145839186 +0200
++++ b/t/53_readonly.t	2026-03-31 17:13:15.935443002 +0200
 @@ -2,9 +2,9 @@
  use strict;
  use warnings;
@@ -2577,7 +2602,7 @@ diff -purd a/t/53_readonly.t b/t/53_readonly.t
      return 1;
 diff -purd a/t/54_stringify.t b/t/54_stringify.t
 --- a/t/54_stringify.t	2023-03-13 15:21:59.000000000 +0100
-+++ b/t/54_stringify.t	2026-03-31 14:13:40.145889650 +0200
++++ b/t/54_stringify.t	2026-03-31 17:13:15.935517892 +0200
 @@ -11,12 +11,12 @@ BEGIN {
    $ENV{PERL_JSON_BACKEND} = 'JSON::PP';
  }
@@ -2605,7 +2630,7 @@ diff -purd a/t/54_stringify.t b/t/54_stringify.t
  is( $json->encode( {false => \"some"} ), '{"false":"some"}','js \"some"');
 diff -purd a/t/55_modifiable.t b/t/55_modifiable.t
 --- a/t/55_modifiable.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/55_modifiable.t	2026-03-31 14:13:40.145934935 +0200
++++ b/t/55_modifiable.t	2026-03-31 17:13:15.935593143 +0200
 @@ -2,9 +2,9 @@
  use strict;
  use warnings;
@@ -2620,7 +2645,7 @@ diff -purd a/t/55_modifiable.t b/t/55_modifiable.t
              '1' => 1, '"test"' => "test" );
 diff -purd a/t/96_interop_pp.t b/t/96_interop_pp.t
 --- a/t/96_interop_pp.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/96_interop_pp.t	2026-03-31 14:13:40.145984548 +0200
++++ b/t/96_interop_pp.t	2026-03-31 17:13:15.935667051 +0200
 @@ -11,10 +11,10 @@ BEGIN {
    $ENV{PERL_JSON_BACKEND} = 0;
  }
@@ -2646,7 +2671,7 @@ diff -purd a/t/96_interop_pp.t b/t/96_interop_pp.t
      # bless { is_true => 1}, "Types::Serialiser"
 diff -purd a/t/96_interop.t b/t/96_interop.t
 --- a/t/96_interop.t	2022-05-03 13:13:02.000000000 +0200
-+++ b/t/96_interop.t	2026-03-31 14:13:40.146032178 +0200
++++ b/t/96_interop.t	2026-03-31 17:13:15.935737433 +0200
 @@ -15,8 +15,8 @@ BEGIN {
    }
  }
@@ -2669,7 +2694,7 @@ diff -purd a/t/96_interop.t b/t/96_interop.t
  
 diff -purd a/t/96_mojo.t b/t/96_mojo.t
 --- a/t/96_mojo.t	2024-07-04 12:37:35.000000000 +0200
-+++ b/t/96_mojo.t	2026-03-31 14:13:40.146083023 +0200
++++ b/t/96_mojo.t	2026-03-31 17:13:15.935808106 +0200
 @@ -13,7 +13,7 @@ BEGIN {
  }
  
@@ -2694,7 +2719,7 @@ diff -purd a/t/96_mojo.t b/t/96_mojo.t
  is( $cjson->encode( $js ), $boolfalse, 'can encode Mojo false' );
 diff -purd a/t/97_unshare_hek.t b/t/97_unshare_hek.t
 --- a/t/97_unshare_hek.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/97_unshare_hek.t	2026-03-31 14:13:40.146128358 +0200
++++ b/t/97_unshare_hek.t	2026-03-31 17:13:15.935874430 +0200
 @@ -1,7 +1,7 @@
  # shared hek destruction. with debugging perls or valgrind only
  # https://github.com/rurban/Cpanel-JSON-XS/issues/10
@@ -2706,7 +2731,7 @@ diff -purd a/t/97_unshare_hek.t b/t/97_unshare_hek.t
      my $obj = decode_json($k);
 diff -purd a/t/98_56only.t b/t/98_56only.t
 --- a/t/98_56only.t	2022-05-03 13:12:26.000000000 +0200
-+++ b/t/98_56only.t	2026-03-31 14:13:40.146176548 +0200
++++ b/t/98_56only.t	2026-03-31 17:13:15.935946806 +0200
 @@ -1,6 +1,6 @@
  use Test::More tests => 4;
  # $] < 5.008 ? (tests => 4) : (skip_all => "5.6 only");
@@ -2735,7 +2760,7 @@ diff -purd a/t/98_56only.t b/t/98_56only.t
  is($obj->[0], -12.34, 'digit -12.34');
 diff -purd a/t/99_binary.t b/t/99_binary.t
 --- a/t/99_binary.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/99_binary.t	2026-03-31 14:13:40.146222023 +0200
++++ b/t/99_binary.t	2026-03-31 17:13:15.936019782 +0200
 @@ -1,10 +1,10 @@
  use Test::More tests => 300;
 -use Cpanel::JSON::XS;
@@ -2753,7 +2778,7 @@ diff -purd a/t/99_binary.t b/t/99_binary.t
    my $c = $_[0];
 diff -purd a/t/zero-mojibake.t b/t/zero-mojibake.t
 --- a/t/zero-mojibake.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/t/zero-mojibake.t	2026-03-31 14:13:40.146268400 +0200
++++ b/t/zero-mojibake.t	2026-03-31 17:13:15.936090004 +0200
 @@ -2,8 +2,8 @@
  
  use strict;
@@ -2767,7 +2792,7 @@ diff -purd a/t/zero-mojibake.t b/t/zero-mojibake.t
  {
 diff -purd a/typemap b/typemap
 --- a/typemap	2022-05-03 13:12:46.000000000 +0200
-+++ b/typemap	2026-03-31 14:13:40.146317642 +0200
++++ b/typemap	2026-03-31 17:13:15.936162369 +0200
 @@ -7,12 +7,12 @@ T_JSON
  	if (!(
             SvROK ($arg)
@@ -2786,7 +2811,7 @@ diff -purd a/typemap b/typemap
  
 diff -purd a/XS/Boolean.pm b/XS/Boolean.pm
 --- a/XS/Boolean.pm	2022-05-03 13:12:46.000000000 +0200
-+++ b/XS/Boolean.pm	2026-03-31 14:13:40.146369259 +0200
++++ b/XS/Boolean.pm	2026-03-31 17:13:15.936237290 +0200
 @@ -1,22 +1,22 @@
  =head1 NAME
  
@@ -2816,7 +2841,7 @@ diff -purd a/XS/Boolean.pm b/XS/Boolean.pm
  
 diff -purd a/XS/Type.pm b/XS/Type.pm
 --- a/XS/Type.pm	2022-05-03 13:12:46.000000000 +0200
-+++ b/XS/Type.pm	2026-03-31 14:13:40.146432448 +0200
++++ b/XS/Type.pm	2026-03-31 17:13:15.936329422 +0200
 @@ -1,15 +1,15 @@
 -package Cpanel::JSON::XS::Type;
 +package JSON::XS::Type;
@@ -2910,7 +2935,7 @@ diff -purd a/XS/Type.pm b/XS/Type.pm
    my ($scalar, $array, $hash);
 diff -purd a/XS.pm b/XS.pm
 --- a/XS.pm	2025-09-08 13:53:39.000000000 +0200
-+++ b/XS.pm	2026-03-31 14:15:42.965443749 +0200
++++ b/XS.pm	2026-03-31 17:13:15.936778704 +0200
 @@ -1,4 +1,4 @@
 -package Cpanel::JSON::XS;
 +package JSON::XS;
@@ -3623,7 +3648,7 @@ diff -purd a/XS.pm b/XS.pm
  L<Mojo::JSON::MaybeXS>, L<JSON::SL>, L<JSON::DWIW>, L<JSON::YAJL>,
 diff -purd a/XS.xs b/XS.xs
 --- a/XS.xs	2025-09-08 13:53:39.000000000 +0200
-+++ b/XS.xs	2026-03-31 14:13:40.147043994 +0200
++++ b/XS.xs	2026-03-31 17:13:15.937380431 +0200
 @@ -328,10 +328,10 @@ mingw_modfl(long double x, long double *
  #define JSON_TYPE_NULL         JSON_TYPE_CAN_BE_NULL
  
@@ -3720,7 +3745,7 @@ diff -purd a/XS.xs b/XS.xs
  void ascii (JSON *self, int enable = 1)
 diff -purd a/xt/gh70-asan.t b/xt/gh70-asan.t
 --- a/xt/gh70-asan.t	2022-05-03 13:12:46.000000000 +0200
-+++ b/xt/gh70-asan.t	2026-03-31 14:13:40.147306806 +0200
++++ b/xt/gh70-asan.t	2026-03-31 17:13:15.937761585 +0200
 @@ -5,7 +5,7 @@
  use Test::Simple tests => 1;
  
@@ -3732,7 +3757,7 @@ diff -purd a/xt/gh70-asan.t b/xt/gh70-asan.t
  package main;
 diff -purd a/xt/leaktrace.t b/xt/leaktrace.t
 --- a/xt/leaktrace.t	2023-02-22 12:08:34.000000000 +0100
-+++ b/xt/leaktrace.t	2026-03-31 14:13:40.147366238 +0200
++++ b/xt/leaktrace.t	2026-03-31 17:13:15.937839501 +0200
 @@ -7,10 +7,10 @@ use constant HAS_LEAKTRACE => eval{ requ
  use Test::More HAS_LEAKTRACE ? (tests => 4) : (skip_all => 'require Test::LeakTrace');
  use Test::LeakTrace;
@@ -3757,14 +3782,3 @@ diff -purd a/xt/leaktrace.t b/xt/leaktrace.t
      eval { $js->encode([0], JSON_TYPE_FLOAT) };
      #print $@;
  }  '<', 1;
---- a/MANIFEST    2026-03-31 14:22:40.614887924 +0200
-+++ b/MANIFEST    2026-03-31 14:22:45.222881763 +0200
-@@ -12,7 +12,7 @@ XS.pm
- XS.xs
- XS/Boolean.pm
- XS/Type.pm
--bin/cpanel_json_xs
-+bin/json_xs
- eg/bench
- ppport.h
- t/00_load.t
