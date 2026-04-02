@@ -31,7 +31,7 @@ diff -purd a/lib/JSON/PP.pm b/lib/JSON/PP.pm
          my $space = $pre eq '' && $self->{PROPS}[P_SPACE_AFTER] ? ' ' : '';
 -        return '[' . $pre . join( ",$space$pre", @res ) . $post . ']';
 +        my $close_indent = $pre ? " " x $self->{indent_length} : "";
-+        return '[' . $pre . join( ",$space$pre", @res ) . $post . . $close_indent . ']';
++        return '[' . $pre . join( ",$space$pre", @res ) . $post . $close_indent . ']';
      }
 
      sub _looks_like_number {
