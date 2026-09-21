@@ -1,0 +1,11 @@
+diff -purd a/t/meta-obj.t b/t/meta-obj.t
+--- a/t/meta-obj.t      2026-08-31 18:54:10.000000000 +0200
++++ b/t/meta-obj.t      2026-09-21 15:41:35.222978899 +0200
+@@ -256,6 +256,7 @@ sub clean_backends {
+   my $string = shift;
+   $string =~ s{"?generated_by.*}{};
+   $string =~ s{"?x_serialization_backend.*}{};
++  $string =~ s{(?:\s*\r?\n\s*)+}{\n}g;
+   return $string;
+ }
+

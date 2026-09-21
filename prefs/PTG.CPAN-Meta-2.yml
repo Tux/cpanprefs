@@ -1,0 +1,5 @@
+--- 
+match:
+  distribution: "ETHER/CPAN-Meta-2"
+patches:
+  - "../../patches/CPAN-Meta-2.patch"
