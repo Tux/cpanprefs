@@ -1,8 +1,3 @@
-Only in b: blib
-Only in b: Makefile
-Only in b: MYMETA.json
-Only in b: MYMETA.yml
-Only in b: pm_to_blib
 diff -purd a/Strip.pm b/Strip.pm
 --- a/Strip.pm	2011-11-11 01:38:11.000000000 +0100
 +++ b/Strip.pm	2015-10-09 08:01:04.835097461 +0200

@@ -126,7 +126,6 @@ diff -purd a/bin/cpanel_json_xs b/bin/cpanel_json_xs
  
     "storable"      => sub { Storable::nfreeze $_ },
     "storable-file" => sub { open my $fh, ">", \my $buf; Storable::nstore_fd $_, $fh; $buf },
-Only in b/bin: json_xs
 diff -purd a/Changes b/Changes
 --- a/Changes	2024-05-28 09:28:16.000000000 +0200
 +++ b/Changes	2024-06-10 13:37:31.000000000 +0200
@@ -172,7 +171,6 @@ diff -purd a/Changes b/Changes
         - const'ed a translation table for memory savings (bulk88)
         - Fixed booleans for JSON 2.9 and JSON-XS-3.01 interop.
           JSON does not support JSON::XS booleans anymore, so
-Only in b: Changes.orig
 diff -purd a/eg/bench b/eg/bench
 --- a/eg/bench	2024-05-28 09:05:05.000000000 +0200
 +++ b/eg/bench	2024-06-10 13:37:31.000000000 +0200
@@ -2333,7 +2331,6 @@ diff -purd a/t/20_unknown.t b/t/20_unknown.t
  
  eval q| $json->encode( [ sub {} ] ) |;
  ok( $@ =~ /encountered CODE/, $@ );
-Only in b/t: 20_unknown.t.orig
 diff -purd a/t/21_evans.t b/t/21_evans.t
 --- a/t/21_evans.t	2024-05-28 09:05:05.000000000 +0200
 +++ b/t/21_evans.t	2024-06-10 13:37:31.000000000 +0200
@@ -2479,8 +2476,6 @@ diff -purd a/t/25_boolean.t b/t/25_boolean.t
  
  
  $js = $unblessed_bool_cjson->decode($booltrue);
-Only in b/t: 25_boolean.t.orig
-Only in b/t: 25_boolean.t.rej
 diff -purd a/t/26_duplicate.t b/t/26_duplicate.t
 --- a/t/26_duplicate.t	2024-05-28 09:05:05.000000000 +0200
 +++ b/t/26_duplicate.t	2024-06-10 13:37:31.000000000 +0200
@@ -3665,7 +3660,6 @@ diff -purd a/XS.pm b/XS.pm
  
  L<JSON::PP>, L<JSON>, L<JSON::XS>, L<JSON::MaybeXS>, L<Mojo::JSON>,
  L<Mojo::JSON::MaybeXS>, L<JSON::SL>, L<JSON::DWIW>, L<JSON::YAJL>,
-Only in b: XS.pm.orig
 diff -purd a/XS.xs b/XS.xs
 --- a/XS.xs	2024-05-28 09:05:05.000000000 +0200
 +++ b/XS.xs	2024-06-10 13:37:31.000000000 +0200

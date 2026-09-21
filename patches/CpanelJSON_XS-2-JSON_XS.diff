@@ -1,6 +1,3 @@
-Only in A/bin: cpanel_json_xs
-Only in C/bin: json_xs
-Only in C: blib
 diff -purd A/Changes C/Changes
 --- A/Changes	2021-04-12 08:31:32.000000000 +0200
 +++ C/Changes	2021-05-22 10:10:27.000000000 +0200
@@ -105,7 +102,6 @@ diff -purd A/eg/bench C/eg/bench
  
     my $count = 5;
     my $times = 200;
-Only in C: Makefile
 diff -purd A/Makefile.PL C/Makefile.PL
 --- A/Makefile.PL	2020-12-14 08:22:05.000000000 +0100
 +++ C/Makefile.PL	2021-05-22 10:12:10.000000000 +0200
@@ -133,9 +129,6 @@ diff -purd A/MANIFEST C/MANIFEST
  eg/bench
  ppport.h
  t/00_load.t
-Only in C: MYMETA.json
-Only in C: MYMETA.yml
-Only in C: pm_to_blib
 diff -purd A/README C/README
 --- A/README	2021-04-12 08:34:00.000000000 +0200
 +++ C/README	2021-05-22 10:13:50.000000000 +0200
@@ -2831,9 +2824,6 @@ diff -purd A/XS/Type.pm C/XS/Type.pm
  
  sub json_type_anyof {
    my ($scalar, $array, $hash);
-Only in C: XS.bs
-Only in C: XS.c
-Only in C: XS.o
 diff -purd A/XS.pm C/XS.pm
 --- A/XS.pm	2021-04-12 08:31:43.000000000 +0200
 +++ C/XS.pm	2021-05-22 10:11:36.000000000 +0200

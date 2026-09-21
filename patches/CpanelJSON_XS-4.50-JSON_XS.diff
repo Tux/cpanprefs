@@ -43,7 +43,6 @@ diff -purd a/Changes b/Changes
         - const'ed a translation table for memory savings (bulk88)
         - Fixed booleans for JSON 2.9 and JSON-XS-3.01 interop.
           JSON does not support JSON::XS booleans anymore, so
-Only in b: Changes.orig
 diff -purd a/eg/bench b/eg/bench
 --- a/eg/bench	2022-05-03 13:12:26.000000000 +0200
 +++ b/eg/bench	2026-09-09 08:41:51.976785956 +0200
@@ -139,7 +138,6 @@ diff -purd a/MANIFEST b/MANIFEST
  eg/bench
  eg/bench_large.pl
  ppport.h
-Only in b: MANIFEST.orig
 diff -purd a/README b/README
 --- a/README	2026-09-08 20:04:44.000000000 +0200
 +++ b/README	2026-09-09 08:41:51.977327411 +0200
@@ -894,7 +892,6 @@ diff -purd a/README b/README
  
      JSON::PP, JSON, JSON::XS, JSON::MaybeXS, Mojo::JSON,
      Mojo::JSON::MaybeXS, JSON::SL, JSON::DWIW, JSON::YAJL, JSON::Any,
-Only in b: README.orig
 diff -purd a/t/00_load.t b/t/00_load.t
 --- a/t/00_load.t	2026-06-06 17:01:47.000000000 +0200
 +++ b/t/00_load.t	2026-09-09 08:41:51.978004971 +0200
@@ -3800,8 +3797,6 @@ diff -purd a/XS.xs b/XS.xs
  #else
  # define NODEBUG_ON
  #endif
-Only in b: XS.xs.orig
-Only in b: XS.xs.rej
 diff -purd a/xt/gh70-asan.t b/xt/gh70-asan.t
 --- a/xt/gh70-asan.t	2022-05-03 13:12:46.000000000 +0200
 +++ b/xt/gh70-asan.t	2026-09-09 08:41:51.986429891 +0200
